@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { ReactNode } from 'react';
-import { Redis } from '@upstash/redis';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
 import { UserIcon, UserPlusIcon } from 'lucide-react';
 
+import { redis } from "@/lib/redis";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SignOutButton } from '@/components/sign-out-button/sign-out-button';
 import { ChatList } from '@/components/chat-list/chat-list';
@@ -18,8 +18,6 @@ export const metadata = {
   title: 'Chatiko | Dashboard',
   description: 'Your dashboard',
 }
-
-const redis = Redis.fromEnv();
 
 const Layout = async ({ children }: Props) => {
   const session = await getServerSession(authOptions);

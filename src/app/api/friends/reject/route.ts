@@ -1,10 +1,8 @@
-import { Redis } from "@upstash/redis";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
+import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
-const redis = Redis.fromEnv();
 
 const POST = async (req: Request) => {
   try {

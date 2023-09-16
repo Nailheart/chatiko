@@ -1,8 +1,8 @@
 import Image from "next/image";
-import { Redis } from "@upstash/redis";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
 
+import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ChatMessages } from "@/components/chat-messages/chat-messages";
 import { ChatInput } from "@/components/chat-input/chat-input";
@@ -12,8 +12,6 @@ type Props = {
     chatId: string;
   }
 }
-
-const redis = Redis.fromEnv();
 
 const Chat = async ({ params }: Props) => {
   const session = await getServerSession(authOptions);

@@ -1,10 +1,9 @@
 import NextAuth, { AuthOptions } from "next-auth";
-import { Redis } from "@upstash/redis";
 import { UpstashRedisAdapter } from '@next-auth/upstash-redis-adapter';
 import GithubProvider from 'next-auth/providers/github';
 import GoogleProvider from 'next-auth/providers/google';
 
-const redis = Redis.fromEnv();
+import { redis } from "@/lib/redis";
 
 export const authOptions: AuthOptions = {
   adapter: UpstashRedisAdapter(redis),
