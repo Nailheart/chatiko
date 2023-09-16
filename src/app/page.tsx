@@ -1,10 +1,18 @@
-import { Button } from "@/components/ui/button"
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
-const Home = () => {
+import { authOptions } from "./api/auth/[...nextauth]/route";
+import { SignIn } from "@/components/sign-in/sign-in";
+
+const Home = async () => {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect("/dashboard");
+  }
+
   return (
     <section>
-      <h1>Hello World!</h1>
-      <Button>Click me</Button>
+      <SignIn />
     </section>
   );
 };
