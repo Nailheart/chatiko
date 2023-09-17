@@ -32,14 +32,13 @@ const ChatMessages: FC<Props> = ({
         const isCurrentUser = message.senderId === currentUser.id;
         const hasNextMessageFromSameUser = messages[index - 1]?.senderId === messages[index].senderId;
         
-        const isFirstMessage = messages.length - 1 === index;
-        const isNextDay = index !== 0 &&
-          new Date(messages[index - 1]?.timestamp).getDay() !==
-          new Date(messages[index]?.timestamp).getDay();
+        const currDate = format(messages[index].timestamp, 'd');
+        const nextDate = index !== messages.length - 1 ? format(messages[index + 1]?.timestamp, 'd') : '';
+        const isNextDay = parseInt(nextDate) !== parseInt(currDate);
 
         return (
           <div key={message.id}>
-            {(isFirstMessage || isNextDay) && (
+            {isNextDay && (
               <p className="text-muted-foreground text-xs text-center mb-2">
                 {format(message.timestamp, 'dd/MM/yy')}
               </p>
