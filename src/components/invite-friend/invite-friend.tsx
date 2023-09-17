@@ -16,8 +16,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 const InviteFriend = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof inviteFriend>>({
     resolver: zodResolver(inviteFriend),
     defaultValues: {
@@ -26,6 +30,8 @@ const InviteFriend = () => {
   });
 
   const onSubmit = async (data: z.infer<typeof inviteFriend>) => {
+    setIsLoading(true);
+
     try {
       const req = await fetch('/api/friends/invite', {
         method: 'POST',
@@ -42,6 +48,8 @@ const InviteFriend = () => {
       form.reset();
     } catch (error) {
       toast.error('Uh oh! Something went wrong.');
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -69,8 +77,15 @@ const InviteFriend = () => {
             </FormItem>
           )}
         />
-        <Button className="mt-6" type="submit">
-          Submit
+        <Button
+          className="mt-6"
+          type="submit"
+          disabled={isLoading}
+        >
+          {isLoading
+            ? <Loader2 className="animate-spin" />
+            : 'Submit'
+          }
         </Button>
       </form>
     </Form>
