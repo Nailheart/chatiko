@@ -44,6 +44,12 @@ const POST = async (req: Request) => {
       message,
     );
 
+    await pusherServer.trigger(
+      `chat--${friendId}`,
+      'unseen_message',
+      message,
+    );
+
     await redis.zadd(`chat:${chatId}:messages`, {
       score: timestamp,
       member: JSON.stringify(message),

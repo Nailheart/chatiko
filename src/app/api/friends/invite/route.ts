@@ -7,16 +7,16 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const POST = async (req: Request) => {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json('You need to authorize first.', { status: 401 });
+    }
+
     const { email } = await req.json();
 
     const userId = await redis.get<string>(`user:email:${email}`);
     if (!userId) {
       return NextResponse.json('This user does not exist.', { status: 400 });
-    }
-    
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json('You need to authorize first.', { status: 401 });
     }
 
     if (userId === session?.user.id) {
