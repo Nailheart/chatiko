@@ -5,19 +5,37 @@ import { FC, useEffect, useState } from "react";
 import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
+import { pusherClient } from "@/lib/pusher";
 
 type Props = {
+  chatId: string;
   chatPartner: User;
   currentUser: User;
   initialMessages: Message[];
 }
 
 const ChatMessages: FC<Props> = ({
+  chatId,
   chatPartner,
   currentUser,
   initialMessages,
 }) => {
   const [messages, setMessages] = useState(initialMessages);
+
+  useEffect(() => {
+    const chat = pusherClient.subscribe(`chat--${chatId}`);
+
+    const messageHandler = (message: Message) => {
+      setMessages(prev => [message, ...prev]);
+    }
+
+    chat.bind('send_message', messageHandler);
+
+    return () => {
+      chat.unsubscribe();
+      chat.unbind_all();
+    }
+  }, []);
 
   useEffect(() => {
     // Scroll to the last message
@@ -39,9 +57,9 @@ const ChatMessages: FC<Props> = ({
         return (
           <div key={message.id}>
             {isNextDay && (
-              <p className="text-muted-foreground text-xs text-center mb-2">
+              <time className="block text-muted-foreground text-xs text-center mb-2">
                 {format(message.timestamp, 'dd/MM/yy')}
-              </p>
+              </time>
             )}
 
             <div className={cn(

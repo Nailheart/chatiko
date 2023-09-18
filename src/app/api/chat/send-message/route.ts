@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { pusherServer } from "@/lib/pusher";
 
 const POST = async (req: Request) => {
   try {
@@ -36,6 +37,12 @@ const POST = async (req: Request) => {
       text,
       timestamp,
     }
+
+    await pusherServer.trigger(
+      `chat--${chatId}`,
+      'send_message',
+      message,
+    );
 
     await redis.zadd(`chat:${chatId}:messages`, {
       score: timestamp,

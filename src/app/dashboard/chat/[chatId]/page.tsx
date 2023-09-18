@@ -58,6 +58,7 @@ const Chat = async ({ params }: Props) => {
       </div>
 
       <ChatMessages
+        chatId={chatId}
         chatPartner={chatPartner as User}
         currentUser={session.user as User}
         initialMessages={initialMessages}
