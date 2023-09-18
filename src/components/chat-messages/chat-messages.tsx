@@ -48,8 +48,8 @@ const ChatMessages: FC<Props> = ({
     <div className='flex h-full flex-1 flex-col-reverse gap-4 py-4 px-8'>
       {messages.map((message, index) => {
         const isCurrentUser = message.senderId === currentUser.id;
-        const hasNextMessageFromSameUser = messages[index - 1]?.senderId === messages[index].senderId;
-        
+        const isFirstMessage = messages[index].senderId !== messages[index + 1]?.senderId;
+
         const currDate = format(messages[index].timestamp, 'd');
         const nextDate = index !== messages.length - 1 ? format(messages[index + 1]?.timestamp, 'd') : '';
         const isNextDay = parseInt(nextDate) !== parseInt(currDate);
@@ -66,23 +66,27 @@ const ChatMessages: FC<Props> = ({
               'flex items-start',
               isCurrentUser && 'justify-end',
             )}>
-              <Image
-                className={cn(
-                  'shrink-0 rounded-full',
-                  isCurrentUser && 'order-2',
+              <div className={cn(
+                'w-10 h-10 shrink-0',
+                isCurrentUser && 'order-2',
+              )}>
+                {isFirstMessage && (
+                  <Image
+                    className="rounded-full"
+                    src={isCurrentUser ? currentUser.image : chatPartner.image}
+                    width={40}
+                    height={40}
+                    sizes="40px"
+                    alt='Profile picture'
+                  />
                 )}
-                src={isCurrentUser ? currentUser.image : chatPartner.image}
-                width={40}
-                height={40}
-                sizes="40px"
-                alt='Profile picture'
-              />
+              </div>
 
               <p className={cn(
                 'bg-secondary text-secondary-foreground flex items-baseline flex-wrap gap-2 break-all mx-2 px-4 py-2 rounded-lg',
                 isCurrentUser && 'bg-primary text-primary-foreground',
-                isCurrentUser && !hasNextMessageFromSameUser && 'rounded-tr-none',
-                !isCurrentUser && !hasNextMessageFromSameUser && 'rounded-tl-none',
+                isCurrentUser && isFirstMessage && 'rounded-tr-none',
+                !isCurrentUser && isFirstMessage && 'rounded-tl-none',
               )}>
                 <span>{message.text}</span>
                 <span className={cn(
