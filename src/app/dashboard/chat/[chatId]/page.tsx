@@ -1,11 +1,16 @@
 import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
+import { Metadata } from "next";
 
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ChatMessages } from "@/components/chat-messages/chat-messages";
 import { ChatInput } from "@/components/chat-input/chat-input";
+
+export const metadata: Metadata = {
+  title: 'Chatiko | Chat',
+}
 
 type Props = {
   params: {

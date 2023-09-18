@@ -1,4 +1,9 @@
+import { Metadata } from "next";
 import { InviteFriend } from "@/components/invite-friend/invite-friend";
+
+export const metadata: Metadata = {
+  title: 'Chatiko | Invite Friend',
+}
 
 const Invite = () => {
   return (

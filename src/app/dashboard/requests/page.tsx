@@ -1,9 +1,14 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
 
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { FriendRequest } from "@/components/friend-request/friend-request";
+
+export const metadata: Metadata = {
+  title: 'Chatiko | Friend Requests',
+}
 
 const Requests = async () => {
   const session = await getServerSession(authOptions);

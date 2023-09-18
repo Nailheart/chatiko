@@ -3,7 +3,8 @@ import Image from 'next/image';
 import { ReactNode } from 'react';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { UserIcon, UserPlusIcon } from 'lucide-react';
+import { UserPlusIcon } from 'lucide-react';
+import type { Metadata } from 'next';
 
 import { redis } from "@/lib/redis";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
@@ -15,9 +16,8 @@ type Props = {
   children: ReactNode;
 }
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Chatiko | Dashboard',
-  description: 'Your dashboard',
 }
 
 const Layout = async ({ children }: Props) => {
