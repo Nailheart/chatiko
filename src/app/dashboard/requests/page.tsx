@@ -23,13 +23,10 @@ const Requests = async () => {
   return (
     <section className="container py-8">
       <h1 className='font-bold text-5xl my-8'>Friend requests</h1>
-      <div className='flex flex-col gap-4'>
-        {Boolean(!users.length) ? (
-          <p className='text-sm text-zinc-500'>You have no friend requests.</p>
-        ) : (
-          <FriendRequest users={users as User[]} />
-        )}
-      </div>
+      <FriendRequest
+        sessionId={session.user.id}
+        users={users as User[]}
+      />
     </section>
   );
 };

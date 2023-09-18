@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { redis } from "@/lib/redis";
+import { pusherServer } from "@/lib/pusher";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 const POST = async (req: Request) => {
@@ -31,6 +32,15 @@ const POST = async (req: Request) => {
     if (isAlreadyAdded) {
       return NextResponse.json('This user is already on your friends list.', { status: 400 })
     }
+
+    const currentUser = await redis.get<User | null>(`user:${session.user.id}`);
+
+    // send friend request from current user
+    await pusherServer.trigger(
+      `incoming_friend_requests--${userId}`,
+      'incoming_friend_requests',
+      currentUser,
+    );
 
     await redis.sadd(`user:${userId}:incoming_friend_requests`, session.user.id);
     

@@ -9,6 +9,7 @@ import { redis } from "@/lib/redis";
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { SignOutButton } from '@/components/sign-out-button/sign-out-button';
 import { ChatList } from '@/components/chat-list/chat-list';
+import { FriendRequestLink } from '@/components/friend-request-link/friend-request-link';
 
 type Props = {
   children: ReactNode;
@@ -73,39 +74,24 @@ const Layout = async ({ children }: Props) => {
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    className='flex items-center gap-3 group rounded-md p-2 text-sm leading-6 font-semibold duration-300 hover:text-secondary-foreground hover:bg-secondary'
-                    href='/dashboard/requests'
-                  >
-                    <span className='group-hover:text-current group-hover:border-current p-1 rounded-md border border-current'>
-                      <UserIcon className='h-4 w-4' />
-                    </span>
-                    <span className='truncate'>Friend requests</span>
-
-                    {Boolean(friendRequests.length) && (
-                      <span className='flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full min-w-[24px] min-h-[24px] leading-0'>
-                        {friendRequests.length > 99 
-                          ? "99+"
-                          : friendRequests.length
-                        }
-                      </span>
-                    )}
-                  </Link>
+                  <FriendRequestLink
+                    sessionId={session.user.id}
+                    requestsCount={friendRequests.length}
+                  />
                 </li>
               </ul>
             </div>
-
-            {Boolean(friendList.length) && (
-              <div>
+            <div>
+              {Boolean(friendList.length) && (
                 <h2 className='text-xs font-semibold leading-6 text-muted-foreground'>
                   Your chats
                 </h2>
-                <ChatList
-                  sessionId={session.user.id}
-                  friendList={friendList as User[]}
-                />
-              </div>
-            )}
+              )}
+              <ChatList
+                sessionId={session.user.id}
+                friendList={friendList as User[]}
+              />
+            </div>
           </div>
           <div className='flex items-center mt-auto pt-6'>
             <div className='flex flex-1 items-center gap-x-4'>

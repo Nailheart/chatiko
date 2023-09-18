@@ -1,24 +1,40 @@
 'use client';
 
 import Image from "next/image";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Check, X } from "lucide-react";
 import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+
+import { pusherClient } from "@/lib/pusher";
 
 type Props = {
+  sessionId: string;
   users: User[];
 }
 
-const FriendRequest: FC<Props> = ({ users }) => {
-  const router = useRouter();
-  const [friendRequests, setFriendRequests] = useState<User[] | null>(users);
+const FriendRequest: FC<Props> = ({ sessionId, users }) => {
+  const [friendRequests, setFriendRequests] = useState(users);
+
+  useEffect(() => {
+    const incomingFriendRequests = pusherClient.subscribe(`incoming_friend_requests--${sessionId}`);
+
+    const friendRequestHandler = (user: User) => {
+      setFriendRequests(prev => [...prev, user]);
+    }
+
+    incomingFriendRequests.bind('incoming_friend_requests', friendRequestHandler);
+
+    return () => {
+      incomingFriendRequests.unsubscribe();
+      incomingFriendRequests.unbind_all();
+    }
+  }, []);
 
   const removeFriendRequest = (userId: string) => {
     setFriendRequests(prev => {
       if(!prev) return [];
       
-      return prev.filter((request) => request.id !== userId);
+      return prev.filter(request => request.id !== userId);
     });
   }
 
@@ -37,7 +53,6 @@ const FriendRequest: FC<Props> = ({ users }) => {
   
       removeFriendRequest(userId);
       toast.success('Friend request accepted.');
-      router.refresh(); 
     } catch (error) {
       toast.error('Uh oh! Something went wrong.');
     }
@@ -58,18 +73,17 @@ const FriendRequest: FC<Props> = ({ users }) => {
   
       removeFriendRequest(userId);
       toast.success('Friend request declined.');
-      router.refresh();
     } catch (error) {
       toast.error('Uh oh! Something went wrong.');
     } 
   }
 
-  if (!friendRequests) {
-    return null;
+  if (!friendRequests.length) {
+    return <p className='text-sm text-zinc-500'>You have no friend requests.</p>
   }
 
   return (
-    <>
+    <div className='flex flex-col gap-4'>
       {friendRequests.map((user) => (
         <div key={user.id} className='flex items-center gap-4'>
           <div className='flex flex-1 items-center gap-x-4'>
@@ -79,7 +93,7 @@ const FriendRequest: FC<Props> = ({ users }) => {
               height={40}
               sizes="40px"
               src={user.image || ''}
-              alt='Your profile avatar'
+              alt='Profile avatar'
             />
 
             <div className='flex flex-col max-w-screen-sm text-sm font-semibold leading-tight'>
@@ -104,7 +118,7 @@ const FriendRequest: FC<Props> = ({ users }) => {
           </button>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 
