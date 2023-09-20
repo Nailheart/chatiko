@@ -17,33 +17,23 @@ const POST = async (req: Request) => {
     const currentUser = await redis.get<User | null>(`user:${session.user.id}`);
     const friend = await redis.get<User | null>(`user:${id}`);
 
-    // TODO: wrap all in await Promise.all([]);
-    // add number of requests in sidebar
-    await pusherServer.trigger(
-      `incoming_friend_requests--${session.user.id}`,
-      'accept_friend_request',
-      'Friend request accepted!',
-    );
+    // Trigger events using Pusher
+    await Promise.all([
+      // accept friend request
+      await pusherServer.trigger(`incoming_friend_requests--${session.user.id}`, 'accept_friend_request', 'Friend request accepted!'),
+      // add new chat in sidebar
+      await pusherServer.trigger(`friend_list--${session.user.id}`, 'new_friend', friend),
+      await pusherServer.trigger(`friend_list--${id}`, 'new_friend', currentUser),
+    ]);
     
-    // add new chats in sidebar
-    await pusherServer.trigger(
-      `friend_list--${session.user.id}`,
-      'new_friend',
-      friend,
-    );
-    await pusherServer.trigger(
-      `friend_list--${id}`,
-      'new_friend',
-      currentUser,
-    );
-
-    // add users to friend list
-    await redis.sadd(`user:${session.user.id}:friend_list`, id);
-    await redis.sadd(`user:${id}:friend_list`, session.user.id);
-    
-    // delete friend request for both users
-    await redis.srem(`user:${session.user.id}:incoming_friend_requests`, id);
-    await redis.srem(`user:${id}:incoming_friend_requests`, session.user.id);
+    await Promise.all([
+      // add users to friend list
+      await redis.sadd(`user:${session.user.id}:friend_list`, id),
+      await redis.sadd(`user:${id}:friend_list`, session.user.id),
+      // delete friend request for both users
+      await redis.srem(`user:${session.user.id}:incoming_friend_requests`, id),
+      await redis.srem(`user:${id}:incoming_friend_requests`, session.user.id),
+    ]);
 
     return NextResponse.json('OK');
   } catch (error) {

@@ -1,13 +1,8 @@
 type User = {
+  id: string;
   name: string;
   email: string;
   image: string;
-  id: string;
-}
-
-type Chat = {
-  id: string;
-  messages: Message[];
 }
 
 type Message = {
@@ -15,10 +10,4 @@ type Message = {
   senderId: string;
   text: string;
   timestamp: number;
-}
-
-type FriendRequest = {
-  id: string;
-  senderId: string;
-  receiverId: string;
 }

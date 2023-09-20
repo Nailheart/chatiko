@@ -20,6 +20,7 @@ const POST = async (req: Request) => {
       'Friend request rejected!',
     );
 
+    // Remove friend request from db
     await redis.srem(`user:${session.user.id}:incoming_friend_requests`, id);
     
     return NextResponse.json('OK');
