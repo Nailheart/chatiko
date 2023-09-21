@@ -35,6 +35,8 @@ const Layout = async ({ children }: Props) => {
       return friend;
     })
   );
+
+  const initialUnseenMessages = await redis.smembers<Message[]>(`user:${session.user.id}:unseen_messages`);
   
   return (
     <div className='flex'>
@@ -90,6 +92,7 @@ const Layout = async ({ children }: Props) => {
               <ChatList
                 sessionId={session.user.id}
                 friendList={friendList as User[]}
+                initialUnseenMessages={initialUnseenMessages}
               />
             </div>
           </div>

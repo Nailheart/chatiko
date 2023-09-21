@@ -5,7 +5,10 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const Toast = () => {
   return (
-    <ToastContainer autoClose={2000} />
+    <ToastContainer
+      autoClose={2000}
+      pauseOnFocusLoss={false}
+    />
   );
 };
 

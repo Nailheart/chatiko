@@ -37,6 +37,9 @@ const POST = async (req: Request) => {
       timestamp,
     }
 
+    // Add message to unseen messages
+    await redis.sadd(`user:${friendId}:unseen_messages`, message);
+
     // Trigger events using Pusher
     await Promise.all([
       pusherServer.trigger(`chat--${chatId}`, 'send_message', message),
@@ -46,7 +49,7 @@ const POST = async (req: Request) => {
     // Store the message in Redis db
     await redis.zadd(`chat:${chatId}:messages`, {
       score: timestamp,
-      member: JSON.stringify(message),
+      member: message,
     });
 
     return NextResponse.json('OK');

@@ -10,12 +10,13 @@ import { pusherClient } from "@/lib/pusher";
 type Props = {
   sessionId: string;
   friendList: User[];
+  initialUnseenMessages: Message[];
 }
 
-const ChatList: FC<Props> = ({ sessionId, friendList }) => {
+const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) => {
   const pathname = usePathname();
   const [chats, setChats] = useState(friendList);
-  const [unseenMessages, setUnseenMessages] = useState<Message[]>([]);
+  const [unseenMessages, setUnseenMessages] = useState<Message[]>(initialUnseenMessages);
 
   useEffect(() => {
     const friendList = pusherClient.subscribe(`friend_list--${sessionId}`);
@@ -29,7 +30,14 @@ const ChatList: FC<Props> = ({ sessionId, friendList }) => {
       const chatId = [sessionId, message.senderId].sort().join('--');
       const isChatPage = pathname === `/dashboard/chat/${chatId}`;
 
-      if (isChatPage) return;
+      if (isChatPage) {
+        // Remove message from unseen messages
+        fetch('/api/chat/remove-unseen-message', {
+          method: 'DELETE',
+          body: JSON.stringify({ unseenMessage: message }),
+        });
+        return;
+      };
 
       setUnseenMessages(prev => [...prev, message]);
     }

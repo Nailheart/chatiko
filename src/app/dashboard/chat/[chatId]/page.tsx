@@ -38,6 +38,14 @@ const Chat = async ({ params }: Props) => {
     rev: true,
   });
 
+  // Remove all unseen messages from this chat
+  const unseenMessages = await redis.smembers<Message[]>(`user:${session.user.id}:unseen_messages`);
+  const messagesToRemove = unseenMessages.filter(msg => msg.senderId === chatPartnerId);
+
+  if (messagesToRemove.length) {
+    await redis.srem(`user:${session.user.id}:unseen_messages`, ...messagesToRemove);
+  }
+
   return (
     <section className='flex flex-col justify-between h-full'>
       <div className='sticky left-0 top-0 bg-background px-8 py-4 border-b-2'>
