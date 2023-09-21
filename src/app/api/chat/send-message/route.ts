@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 const POST = async (req: Request) => {
   try {
@@ -42,11 +43,19 @@ const POST = async (req: Request) => {
 
     // Trigger events using Pusher
     await Promise.all([
-      pusherServer.trigger(`chat--${chatId}`, 'send_message', message),
-      pusherServer.trigger(`chat--${friendId}`, 'unseen_message', message),
+      pusherServer.trigger(
+        PusherChannel.CHAT_ID + chatId,
+        PusherEvent.SEND_MESSAGE,
+        message
+      ),
+      pusherServer.trigger(
+        PusherChannel.CHAT_ID + friendId,
+        PusherEvent.UNSEEN_MESSAGE,
+        message
+      ),
     ]);
 
-    // Store the message in Redis db
+    // Store the message in database
     await redis.zadd(`chat:${chatId}:messages`, {
       score: timestamp,
       member: message,

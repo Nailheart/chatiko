@@ -5,6 +5,7 @@ import { UserIcon } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 
 import { pusherClient } from "@/lib/pusher";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   sessionId: string;
@@ -15,7 +16,7 @@ const FriendRequestLink: FC<Props> = ({ sessionId, requestsCount }) => {
   const [friendRequests, setFriendRequests] = useState(requestsCount);
 
   useEffect(() => {
-    const incomingFriendRequest = pusherClient.subscribe(`incoming_friend_requests--${sessionId}`);
+    const incomingFriendRequest = pusherClient.subscribe(PusherChannel.INCOMING_FRIEND_REQUESTS_ID + sessionId);
   
     const incomingRequestHandler = () => {
       setFriendRequests(prev => prev + 1);
@@ -25,13 +26,13 @@ const FriendRequestLink: FC<Props> = ({ sessionId, requestsCount }) => {
       setFriendRequests(prev => prev - 1);
     }
 
-    incomingFriendRequest.bind('incoming_friend_requests', incomingRequestHandler);
-    incomingFriendRequest.bind('accept_friend_request', removeFriendRequest);
-    incomingFriendRequest.bind('reject_friend_request', removeFriendRequest);
+    incomingFriendRequest.bind(PusherEvent.INCOMING_FRIEND_REQUESTS, incomingRequestHandler);
+    incomingFriendRequest.bind(PusherEvent.ACECEPT_FRIEND_REQUEST, removeFriendRequest);
+    incomingFriendRequest.bind(PusherEvent.REJECT_FRIEND_REQUEST, removeFriendRequest);
 
     return () => {
-      incomingFriendRequest.unbind_all();
       incomingFriendRequest.unsubscribe();
+      incomingFriendRequest.unbind_all();
     }
   }, []);
 
@@ -45,6 +46,7 @@ const FriendRequestLink: FC<Props> = ({ sessionId, requestsCount }) => {
       </span>
       <span className='truncate'>Friend requests</span>
 
+      {/* TODO: fix pusher */}
       {friendRequests !== 0 && (
         <span className='flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full min-w-[24px] min-h-[24px] leading-0'>
           {friendRequests > 99 
@@ -52,7 +54,7 @@ const FriendRequestLink: FC<Props> = ({ sessionId, requestsCount }) => {
             : friendRequests
           }
         </span>
-      )}
+      )} 
     </Link>
   );
 };

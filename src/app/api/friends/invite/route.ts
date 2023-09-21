@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { redis } from "@/lib/redis";
 import { pusherServer } from "@/lib/pusher";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 const POST = async (req: Request) => {
   try {
@@ -35,10 +36,10 @@ const POST = async (req: Request) => {
 
     const currentUser = await redis.get<User | null>(`user:${session.user.id}`);
 
-    // Send friend request using Pusher
+    // Send friend request
     await pusherServer.trigger(
-      `incoming_friend_requests--${userId}`,
-      'incoming_friend_requests',
+      PusherChannel.INCOMING_FRIEND_REQUESTS_ID + userId,
+      PusherEvent.INCOMING_FRIEND_REQUESTS,
       currentUser,
     );
 

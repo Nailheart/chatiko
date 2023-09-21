@@ -6,6 +6,7 @@ import { Check, X } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { pusherClient } from "@/lib/pusher";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   sessionId: string;
@@ -16,13 +17,13 @@ const FriendRequest: FC<Props> = ({ sessionId, users }) => {
   const [friendRequests, setFriendRequests] = useState(users);
 
   useEffect(() => {
-    const incomingFriendRequests = pusherClient.subscribe(`incoming_friend_requests--${sessionId}`);
+    const incomingFriendRequests = pusherClient.subscribe(PusherChannel.INCOMING_FRIEND_REQUESTS_ID + sessionId);
 
     const friendRequestHandler = (user: User) => {
       setFriendRequests(prev => [...prev, user]);
     }
 
-    incomingFriendRequests.bind('incoming_friend_requests', friendRequestHandler);
+    incomingFriendRequests.bind(PusherEvent.INCOMING_FRIEND_REQUESTS, friendRequestHandler);
 
     return () => {
       incomingFriendRequests.unsubscribe();

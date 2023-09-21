@@ -6,6 +6,7 @@ import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { pusherClient } from "@/lib/pusher";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   chatId: string;
@@ -23,13 +24,13 @@ const ChatMessages: FC<Props> = ({
   const [messages, setMessages] = useState(initialMessages);
 
   useEffect(() => {
-    const chat = pusherClient.subscribe(`chat--${chatId}`);
+    const chat = pusherClient.subscribe(PusherChannel.CHAT_ID + chatId);
 
     const messageHandler = (message: Message) => {
       setMessages(prev => [message, ...prev]);
     }
 
-    chat.bind('send_message', messageHandler);
+    chat.bind(PusherEvent.SEND_MESSAGE, messageHandler);
 
     return () => {
       chat.unsubscribe();

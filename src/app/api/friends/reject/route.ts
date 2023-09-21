@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 const POST = async (req: Request) => {
   try {
@@ -14,9 +15,10 @@ const POST = async (req: Request) => {
       return NextResponse.json('You need to authorize first.', { status: 401 });
     }
 
+    // Remove friend request from state
     await pusherServer.trigger(
-      `incoming_friend_requests--${session.user.id}`,
-      'reject_friend_request',
+      PusherChannel.INCOMING_FRIEND_REQUESTS_ID + session.user.id,
+      PusherEvent.REJECT_FRIEND_REQUEST,
       'Friend request rejected!',
     );
 

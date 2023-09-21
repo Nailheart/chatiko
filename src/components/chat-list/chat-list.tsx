@@ -5,7 +5,9 @@ import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
+import { cn } from "@/lib/utils";
 import { pusherClient } from "@/lib/pusher";
+import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   sessionId: string;
@@ -19,8 +21,8 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
   const [unseenMessages, setUnseenMessages] = useState<Message[]>(initialUnseenMessages);
 
   useEffect(() => {
-    const friendList = pusherClient.subscribe(`friend_list--${sessionId}`);
-    const chat = pusherClient.subscribe(`chat--${sessionId}`);
+    const friendList = pusherClient.subscribe(PusherChannel.FRIEND_LIST_ID + sessionId);
+    const chat = pusherClient.subscribe(PusherChannel.CHAT_ID + sessionId);
 
     const friendListHandler = (friend: User) => {
       setChats(prev => [...prev, friend]);
@@ -42,8 +44,8 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
       setUnseenMessages(prev => [...prev, message]);
     }
 
-    friendList.bind('new_friend', friendListHandler);
-    chat.bind('unseen_message', unseenMessagesHandler);
+    friendList.bind(PusherEvent.NEW_FRIEND, friendListHandler);
+    chat.bind(PusherEvent.UNSEEN_MESSAGE, unseenMessagesHandler);
 
     return () => {
       friendList.unsubscribe();
@@ -65,6 +67,7 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
       {chats.map(chat => {
         // one chatId for both user
         const chatId = [sessionId, chat.id].sort().join('--');
+        const isActive = pathname === `/dashboard/chat/${chatId}`;
 
         const unseenMessagesCount = unseenMessages.filter(msg => {
           return msg.senderId === chat.id;
@@ -73,7 +76,11 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
         return (
           <li key={chatId}>
             <Link
-              className="hover:text-secondary-foreground hover:bg-secondary group flex items-center gap-3 rounded-md p-2 text-sm leading-6 font-semibold duration-300"
+              className={cn(
+                'flex items-center gap-3 rounded-md p-2 text-sm leading-6 font-semibold duration-300',
+                isActive && 'bg-secondary text-secondary-foreground',
+                !isActive && 'hover:text-secondary-foreground hover:bg-secondary',
+              )}
               href={`/dashboard/chat/${chatId}`}
             >
               <Image
