@@ -23,6 +23,7 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
   useEffect(() => {
     const friendList = pusherClient.subscribe(PusherChannel.FRIEND_LIST_ID + sessionId);
     const chat = pusherClient.subscribe(PusherChannel.CHAT_ID + sessionId);
+    const chatDelete = pusherClient.subscribe(PusherChannel.CHAT_DELETE_ID + sessionId);
 
     const friendListHandler = (friend: User) => {
       setChats(prev => [...prev, friend]);
@@ -44,14 +45,21 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
       setUnseenMessages(prev => [...prev, message]);
     }
 
+    const chatDeletehandler = (chatPartnerId: string) => {
+      setChats(prev =>  prev.filter(user => user.id !== chatPartnerId));
+    }
+
     friendList.bind(PusherEvent.NEW_FRIEND, friendListHandler);
     chat.bind(PusherEvent.UNSEEN_MESSAGE, unseenMessagesHandler);
+    chatDelete.bind(PusherEvent.CHAT_DELETE, chatDeletehandler);
 
     return () => {
       friendList.unsubscribe();
       friendList.unbind_all();
       chat.unsubscribe();
       chat.unbind_all();
+      chatDelete.unsubscribe();
+      chatDelete.unbind_all();
     }
   }, [pathname]);
 

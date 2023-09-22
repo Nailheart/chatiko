@@ -24,7 +24,6 @@ const POST = async (req: Request) => {
       PusherEvent.ACECEPT_FRIEND_REQUEST,
       'Friend request accepted!'
     );
-    // await pusherServer.trigger(`incoming_friend_requests--${id}`, 'accept_friend_request', 'Friend request accepted!');
     
     // add new chat in sidebar
     await pusherServer.trigger(

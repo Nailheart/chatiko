@@ -7,6 +7,7 @@ import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { ChatMessages } from "@/components/chat-messages/chat-messages";
 import { ChatInput } from "@/components/chat-input/chat-input";
+import { ChatSettings } from "@/components/chat-settings/chat-settings";
 
 export const metadata: Metadata = {
   title: 'Chatiko | Chat',
@@ -27,12 +28,12 @@ const Chat = async ({ params }: Props) => {
   const { chatId } = params;
   const [userId1, userId2] = chatId.split('--');
 
-  if (session.user.id !== userId1 && session.user.id !== userId2) {
-    notFound();
-  }
-
   const chatPartnerId = session.user.id === userId1 ? userId2 : userId1;
   const chatPartner = await redis.get<User>(`user:${chatPartnerId}`);
+
+  if (!chatPartner || !session.user) {
+    notFound();
+  }
 
   const initialMessages = await redis.zrange<Message[]>(`chat:${chatId}:messages`, 0, -1, {
     rev: true,
@@ -48,11 +49,11 @@ const Chat = async ({ params }: Props) => {
 
   return (
     <section className='flex flex-col justify-between h-full'>
-      <div className='sticky left-0 top-0 bg-background px-8 py-4 border-b-2'>
+      <div className='flex justify-between gap-4 sticky left-0 top-0 bg-background px-8 py-4 border-b-2'>
         <div className='flex items-center space-x-4'>
           <Image
             className="rounded-full"
-            src={chatPartner?.image || ''}
+            src={chatPartner.image}
             alt="Profile avatar"
             width={40}
             height={40}
@@ -61,18 +62,22 @@ const Chat = async ({ params }: Props) => {
 
           <div className='flex flex-col leading-tight'>
             <span className='font-semibold mr-3'>
-              {chatPartner?.name}
+              {chatPartner.name}
             </span>
             <span className='text-muted-foreground text-sm'>
-              {chatPartner?.email}
+              {chatPartner.email}
             </span>
           </div>
         </div>
+        <ChatSettings 
+          chatId={chatId}
+          chatPartner={chatPartner}
+        />
       </div>
 
       <ChatMessages
         chatId={chatId}
-        chatPartner={chatPartner as User}
+        chatPartner={chatPartner}
         currentUser={session.user as User}
         initialMessages={initialMessages}
       />

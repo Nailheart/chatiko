@@ -27,7 +27,7 @@ const POST = async (req: Request) => {
     const isFriend = friendList.includes(friendId);
 
     if (!isFriend) {
-      return NextResponse.json('This user is not on your friends list.', { status: 401 });
+      return NextResponse.json('This user delete you from friends list.', { status: 401 });
     }
 
     const timestamp = Date.now();
