@@ -10,18 +10,19 @@ import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   chatId: string;
-  chatPartner: User;
+  chatPartners: User[];
   currentUser: User;
   initialMessages: Message[];
 }
 
 const ChatMessages: FC<Props> = ({
   chatId,
-  chatPartner,
+  chatPartners,
   currentUser,
   initialMessages,
 }) => {
   const [messages, setMessages] = useState(initialMessages);
+  const isGroupChat = chatPartners.length > 1;
 
   useEffect(() => {
     const chat = pusherClient.subscribe(PusherChannel.CHAT_ID + chatId);
@@ -51,6 +52,10 @@ const ChatMessages: FC<Props> = ({
         const isCurrentUser = message.senderId === currentUser.id;
         const isFirstMessage = messages[index].senderId !== messages[index + 1]?.senderId;
 
+        const chatPartner = isGroupChat 
+          ? chatPartners.filter(partner => partner.id === message.senderId)[0]
+          : chatPartners[0]
+
         const currDate = format(messages[index].timestamp, 'd');
         const nextDate = index !== messages.length - 1 ? format(messages[index + 1]?.timestamp, 'd') : '';
         const isNextDay = parseInt(nextDate) !== parseInt(currDate);
@@ -62,7 +67,14 @@ const ChatMessages: FC<Props> = ({
                 {format(message.timestamp, 'dd/MM/yy')}
               </time>
             )}
-
+            {isFirstMessage && isGroupChat && (
+              <p className={cn(
+                'text-xs mb-1',
+                isCurrentUser && 'text-right'
+              )}>
+                {chatPartner.name}
+              </p>
+            )}
             <div className={cn(
               'flex items-start',
               isCurrentUser && 'justify-end',
@@ -89,7 +101,7 @@ const ChatMessages: FC<Props> = ({
                 isCurrentUser && isFirstMessage && 'rounded-tr-none',
                 !isCurrentUser && isFirstMessage && 'rounded-tl-none',
               )}>
-                <span>{message.text}</span>
+                <span>{message.content}</span>
                 <span className={cn(
                   'text-muted-foreground text-xs shrink-0 ml-auto',
                   isCurrentUser && 'text-primary-foreground'

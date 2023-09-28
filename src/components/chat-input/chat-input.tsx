@@ -23,7 +23,7 @@ const ChatInput: FC<Props> = ({ chatId }) => {
     try {
       const req = await fetch('/api/chat/send-message', {
         method: 'POST',
-        body: JSON.stringify({ text: input, chatId }),
+        body: JSON.stringify({ content: input, chatId }),
       });
 
       if (!req.ok) {

@@ -13,7 +13,7 @@ const DELETE = async (req: Request) => {
       return NextResponse.json('You need to authorize first.', { status: 401 });
     }
 
-    await redis.srem(`user:${session.user.id}:unseen_messages`, unseenMessage);
+    await redis.lrem(`user:${session.user.id}:unseen_messages`, 0, unseenMessage);
 
     return NextResponse.json('OK');
   } catch (error) {

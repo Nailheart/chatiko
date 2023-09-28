@@ -7,8 +7,9 @@
 enum PusherChannel {
   INCOMING_FRIEND_REQUESTS_ID = 'incoming_friend_requests',
   INCOMING_FRIEND_REQUEST_USER_ID = 'incoming_friend_request_user',
-  FRIEND_LIST_ID = 'friend_list',
+  NEW_CHAT_ID = 'new_chat',
   CHAT_ID = 'chat',
+  CHAT_UNSEEN_MESSAGE = 'unseen_message',
   CHAT_DELETE_ID = 'chat_delete',
 }
 
@@ -17,7 +18,7 @@ enum PusherEvent {
   INCOMING_FRIEND_REQUEST_USER = 'incoming_friend_request_user',
   ACECEPT_FRIEND_REQUEST = 'accept_friend_request',
   REJECT_FRIEND_REQUEST = 'reject_friend_request',
-  NEW_FRIEND = 'new_friend',
+  NEW_CHAT = 'new_chat',
   SEND_MESSAGE = 'send_message',
   UNSEEN_MESSAGE = 'unseen_message',
   CHAT_DELETE = 'chat_delete',

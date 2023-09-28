@@ -46,7 +46,6 @@ const FriendRequestLink: FC<Props> = ({ sessionId, requestsCount }) => {
       </span>
       <span className='truncate'>Friend requests</span>
 
-      {/* TODO: fix pusher */}
       {friendRequests !== 0 && (
         <span className='flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full min-w-[24px] min-h-[24px] leading-0'>
           {friendRequests > 99 

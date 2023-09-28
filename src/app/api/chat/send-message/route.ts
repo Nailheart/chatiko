@@ -9,37 +9,41 @@ import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 const POST = async (req: Request) => {
   try {
-    const { text, chatId } = await req.json();
+    const { content, chatId } = await req.json();
   
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json('You need to authorize first.', { status: 401 });
     }
 
-    const [userId1, userId2] = chatId.split('--');
+    const chats = await redis.smembers<Chat[]>(`user:${session.user.id}:chats`);
+    const chat = chats.filter(chat => chat.id === chatId)[0];
 
-    if (session.user.id !== userId1 && session.user.id !== userId2) {
-      return NextResponse.json('No such chat found.', { status: 401 });
-    }
-
-    const friendId = session.user.id === userId1 ? userId2 : userId1;
-    const friendList = await redis.smembers(`user:${session.user.id}:friend_list`);
-    const isFriend = friendList.includes(friendId);
-
-    if (!isFriend) {
-      return NextResponse.json('This user delete you from friends list.', { status: 401 });
+    if (!chat) {
+      return NextResponse.json('No such chat found.', { status: 400 });
     }
 
     const timestamp = Date.now();
     const message: Message = {
       id: nanoid(),
       senderId: session.user.id,
-      text,
+      content,
       timestamp,
     }
 
-    // Add message to unseen messages
-    await redis.sadd(`user:${friendId}:unseen_messages`, message);
+    const unseenMessage: UnseenMessage = {
+      chatId,
+      ...message,
+    }
+
+    // add message to unseen messages for each user
+    const sendUnseenMessage: Promise<number>[] = [];
+    chat.users.forEach(user => {
+      const req = redis.lpush(`user:${user.id}:unseen_messages`, unseenMessage);
+      sendUnseenMessage.push(req);
+    });
+
+    await Promise.all(sendUnseenMessage);
 
     // Trigger events using Pusher
     await Promise.all([
@@ -49,9 +53,9 @@ const POST = async (req: Request) => {
         message
       ),
       pusherServer.trigger(
-        PusherChannel.CHAT_ID + friendId,
+        PusherChannel.CHAT_UNSEEN_MESSAGE,
         PusherEvent.UNSEEN_MESSAGE,
-        message
+        unseenMessage
       ),
     ]);
 

@@ -26,18 +26,10 @@ const Layout = async ({ children }: Props) => {
     redirect("/");
   }
 
-  const friendRequests = await redis.smembers(`user:${session.user.id}:incoming_friend_requests`);
-  
-  const friendIds = await redis.smembers(`user:${session.user.id}:friend_list`);
-  const friendList = await Promise.all(
-    friendIds.map(async (friendId) => {
-      const friend = await redis.get<User | null>(`user:${friendId}`);
-      return friend;
-    })
-  );
+  const friendRequests = await redis.smembers(`user:${session.user.id}:incoming_friend_requests`);  
+  const chats = await redis.smembers<Chat[]>(`user:${session.user.id}:chats`);
+  const initialUnseenMessages = await redis.lrange<UnseenMessage>(`user:${session.user.id}:unseen_messages`, 0, -1);
 
-  const initialUnseenMessages = await redis.smembers<Message[]>(`user:${session.user.id}:unseen_messages`);
-  
   return (
     <div className='flex'>
       <div className='hidden md:flex w-full h-screen max-w-xs py-3 px-6 flex-col gap-y-5 border-r bg-background overflow-auto scrollbar-thin sticky top-0 left-0'>
@@ -84,14 +76,14 @@ const Layout = async ({ children }: Props) => {
               </ul>
             </div>
             <div>
-              {Boolean(friendList.length) && (
+              {Boolean(chats.length) && (
                 <h2 className='text-xs font-semibold leading-6 text-muted-foreground'>
                   Your chats
                 </h2>
               )}
               <ChatList
                 sessionId={session.user.id}
-                friendList={friendList as User[]}
+                initialChats={chats}
                 initialUnseenMessages={initialUnseenMessages}
               />
             </div>

@@ -11,26 +11,26 @@ import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   sessionId: string;
-  friendList: User[];
-  initialUnseenMessages: Message[];
+  initialChats: Chat[];
+  initialUnseenMessages: UnseenMessage[];
 }
 
-const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) => {
+const ChatList: FC<Props> = ({ sessionId, initialChats, initialUnseenMessages }) => {
   const pathname = usePathname();
-  const [chats, setChats] = useState(friendList);
-  const [unseenMessages, setUnseenMessages] = useState<Message[]>(initialUnseenMessages);
+  const [chats, setChats] = useState(initialChats);
+  const [unseenMessages, setUnseenMessages] = useState(initialUnseenMessages);
 
   useEffect(() => {
-    const friendList = pusherClient.subscribe(PusherChannel.FRIEND_LIST_ID + sessionId);
-    const chat = pusherClient.subscribe(PusherChannel.CHAT_ID + sessionId);
-    const chatDelete = pusherClient.subscribe(PusherChannel.CHAT_DELETE_ID + sessionId);
+    const newChat = pusherClient.subscribe(PusherChannel.NEW_CHAT_ID + sessionId);
+    const chatUnseenMessages = pusherClient.subscribe(PusherChannel.CHAT_UNSEEN_MESSAGE);
+    // const chatDelete = pusherClient.subscribe(PusherChannel.CHAT_DELETE_ID + sessionId);
 
-    const friendListHandler = (friend: User) => {
-      setChats(prev => [...prev, friend]);
+    const newChatHandler = (chat: Chat) => {
+      setChats(prev => [...prev, chat]);
     }
 
-    const unseenMessagesHandler = (message: Message) => {
-      const chatId = [sessionId, message.senderId].sort().join('--');
+    const unseenMessagesHandler = (message: UnseenMessage) => {
+      const chatId = message.chatId;
       const isChatPage = pathname === `/dashboard/chat/${chatId}`;
 
       if (isChatPage) {
@@ -45,41 +45,42 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
       setUnseenMessages(prev => [...prev, message]);
     }
 
-    const chatDeletehandler = (chatPartnerId: string) => {
-      setChats(prev =>  prev.filter(user => user.id !== chatPartnerId));
-    }
+    // const chatDeletehandler = (chatPartnerId: string) => {
+    //   setChats(prev =>  prev.filter(user => user.id !== chatPartnerId));
+    // }
 
-    friendList.bind(PusherEvent.NEW_FRIEND, friendListHandler);
-    chat.bind(PusherEvent.UNSEEN_MESSAGE, unseenMessagesHandler);
-    chatDelete.bind(PusherEvent.CHAT_DELETE, chatDeletehandler);
+    newChat.bind(PusherEvent.NEW_CHAT, newChatHandler);
+    chatUnseenMessages.bind(PusherEvent.UNSEEN_MESSAGE, unseenMessagesHandler);
+    // chatDelete.bind(PusherEvent.CHAT_DELETE, chatDeletehandler);
 
     return () => {
-      friendList.unsubscribe();
-      friendList.unbind_all();
-      chat.unsubscribe();
-      chat.unbind_all();
-      chatDelete.unsubscribe();
-      chatDelete.unbind_all();
+      chatUnseenMessages.unsubscribe();
+      chatUnseenMessages.unbind_all();
+      newChat.unsubscribe();
+      newChat.unbind_all();
+      // chatDelete.unsubscribe();
+      // chatDelete.unbind_all();
     }
   }, [pathname]);
 
   // reset unseen messages
   useEffect(() => {
     if (pathname.includes('chat')) {
-      setUnseenMessages(prev => prev.filter(msg => !pathname.includes(msg.senderId)));
+      const chat = chats.filter(chat => pathname.includes(chat.id))[0];
+
+      setUnseenMessages(prev => {
+        return prev.filter(msg => msg.chatId !== chat.id);
+      });
     }
   }, [pathname]);
 
   return (
     <ul className="space-y-1">
       {chats.map(chat => {
-        // one chatId for both user
-        const chatId = [sessionId, chat.id].sort().join('--');
+        const chatId = chat.id;
         const isActive = pathname === `/dashboard/chat/${chatId}`;
-
-        const unseenMessagesCount = unseenMessages.filter(msg => {
-          return msg.senderId === chat.id;
-        }).length;
+        const isGroupChat = chat.users.length > 1;
+        const unseenMessagesCount = unseenMessages.filter(msg => msg.chatId === chat.id).length;
 
         return (
           <li key={chatId}>
@@ -91,14 +92,22 @@ const ChatList: FC<Props> = ({ sessionId, friendList, initialUnseenMessages }) =
               )}
               href={`/dashboard/chat/${chatId}`}
             >
-              <Image
-                className='rounded-full'
-                width={32}
-                height={32}
-                sizes="32px"
-                src={chat.image || ''}
-                alt='Chat avatar'
-              />
+              {isGroupChat ? (
+                <div className="w-8 h-8 bg-orange-400 rounded-full">
+                  <span className="text-white">
+                    {chat.name.charAt(0)}
+                  </span>
+                </div>
+              ) : (
+                <Image
+                  className='rounded-full'
+                  width={32}
+                  height={32}
+                  sizes="32px"
+                  src={chat.users[0].image}
+                  alt='Chat avatar'
+                />
+              )}
 
               {chat.name}
               {unseenMessagesCount > 0 && (
