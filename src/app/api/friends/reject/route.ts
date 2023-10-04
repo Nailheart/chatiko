@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
-import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 const POST = async (req: Request) => {
   try {
@@ -16,9 +15,9 @@ const POST = async (req: Request) => {
     }
 
     // Remove friend request from state
-    await pusherServer.trigger(
-      PusherChannel.INCOMING_FRIEND_REQUESTS_ID + session.user.id,
-      PusherEvent.REJECT_FRIEND_REQUEST,
+    pusherServer.trigger(
+      session.user.id,
+      'reject_friend_request',
       'Friend request rejected!',
     );
 

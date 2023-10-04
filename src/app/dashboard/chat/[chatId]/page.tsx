@@ -87,12 +87,12 @@ const Chat = async ({ params }: Props) => {
           chatPartner={chatPartner}
         /> */}
       </div>
-
       <ChatMessages
         chatId={chatId}
         chatPartners={chat.users}
         currentUser={session.user as User}
         initialMessages={initialMessages}
+        isGroupChat={isGroupChat}
       />
       <ChatInput chatId={chatId} />
     </section>

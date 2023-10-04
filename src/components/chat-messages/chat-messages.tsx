@@ -6,13 +6,13 @@ import { format } from "date-fns";
 
 import { cn } from "@/lib/utils";
 import { pusherClient } from "@/lib/pusher";
-import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   chatId: string;
   chatPartners: User[];
   currentUser: User;
   initialMessages: Message[];
+  isGroupChat: boolean;
 }
 
 const ChatMessages: FC<Props> = ({
@@ -20,18 +20,18 @@ const ChatMessages: FC<Props> = ({
   chatPartners,
   currentUser,
   initialMessages,
+  isGroupChat,
 }) => {
   const [messages, setMessages] = useState(initialMessages);
-  const isGroupChat = chatPartners.length > 1;
 
   useEffect(() => {
-    const chat = pusherClient.subscribe(PusherChannel.CHAT_ID + chatId);
+    const chat = pusherClient.subscribe(chatId);
 
     const messageHandler = (message: Message) => {
       setMessages(prev => [message, ...prev]);
     }
 
-    chat.bind(PusherEvent.SEND_MESSAGE, messageHandler);
+    chat.bind('new_message', messageHandler);
 
     return () => {
       chat.unsubscribe();

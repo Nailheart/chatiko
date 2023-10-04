@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { pusherClient } from "@/lib/pusher";
-import { PusherChannel, PusherEvent } from '@/enums/enums';
 
 type Props = {
   sessionId: string;
@@ -21,9 +20,12 @@ const ChatList: FC<Props> = ({ sessionId, initialChats, initialUnseenMessages })
   const [unseenMessages, setUnseenMessages] = useState(initialUnseenMessages);
 
   useEffect(() => {
-    const newChat = pusherClient.subscribe(PusherChannel.NEW_CHAT_ID + sessionId);
-    const chatUnseenMessages = pusherClient.subscribe(PusherChannel.CHAT_UNSEEN_MESSAGE);
-    // const chatDelete = pusherClient.subscribe(PusherChannel.CHAT_DELETE_ID + sessionId);
+    const newChat = pusherClient.subscribe(sessionId);
+    
+    // subscribe for unseen message
+    chats.forEach(chat => {
+      pusherClient.subscribe(chat.id);
+    });
 
     const newChatHandler = (chat: Chat) => {
       setChats(prev => [...prev, chat]);
@@ -45,23 +47,26 @@ const ChatList: FC<Props> = ({ sessionId, initialChats, initialUnseenMessages })
       setUnseenMessages(prev => [...prev, message]);
     }
 
+    newChat.bind('new_chat', newChatHandler);
+    pusherClient.bind('unseen_message', unseenMessagesHandler);
+
     // const chatDeletehandler = (chatPartnerId: string) => {
     //   setChats(prev =>  prev.filter(user => user.id !== chatPartnerId));
     // }
-
-    newChat.bind(PusherEvent.NEW_CHAT, newChatHandler);
-    chatUnseenMessages.bind(PusherEvent.UNSEEN_MESSAGE, unseenMessagesHandler);
     // chatDelete.bind(PusherEvent.CHAT_DELETE, chatDeletehandler);
 
     return () => {
-      chatUnseenMessages.unsubscribe();
-      chatUnseenMessages.unbind_all();
+      chats.forEach(chat => {
+        pusherClient.unsubscribe(chat.id);
+      });
+      pusherClient.unbind('unseen_message', unseenMessagesHandler);
+
       newChat.unsubscribe();
       newChat.unbind_all();
       // chatDelete.unsubscribe();
       // chatDelete.unbind_all();
     }
-  }, [pathname]);
+  }, [pathname, chats]);
 
   // reset unseen messages
   useEffect(() => {
@@ -75,54 +80,61 @@ const ChatList: FC<Props> = ({ sessionId, initialChats, initialUnseenMessages })
   }, [pathname]);
 
   return (
-    <ul className="space-y-1">
-      {chats.map(chat => {
-        const chatId = chat.id;
-        const isActive = pathname === `/dashboard/chat/${chatId}`;
-        const isGroupChat = chat.users.length > 1;
-        const unseenMessagesCount = unseenMessages.filter(msg => msg.chatId === chat.id).length;
+    <div>
+      {Boolean(chats.length) && (
+        <h2 className="text-xs font-semibold leading-6 text-muted-foreground">
+          Your chats
+        </h2>
+      )}
+      <ul className="space-y-1">
+        {chats.map(chat => {
+          const chatId = chat.id;
+          const isActive = pathname === `/dashboard/chat/${chatId}`;
+          const isGroupChat = chat.users.length > 1;
+          const unseenMessagesCount = unseenMessages.filter(msg => msg.chatId === chat.id).length;
 
-        return (
-          <li key={chatId}>
-            <Link
-              className={cn(
-                'flex items-center gap-3 rounded-md p-2 text-sm leading-6 font-semibold duration-300',
-                isActive && 'bg-secondary text-secondary-foreground',
-                !isActive && 'hover:text-secondary-foreground hover:bg-secondary',
-              )}
-              href={`/dashboard/chat/${chatId}`}
-            >
-              {isGroupChat ? (
-                <div className="w-8 h-8 bg-orange-400 rounded-full">
-                  <span className="text-white">
-                    {chat.name.charAt(0)}
+          return (
+            <li key={chatId}>
+              <Link
+                className={cn(
+                  'flex items-center gap-3 rounded-md p-2 text-sm leading-6 font-semibold duration-300',
+                  isActive && 'bg-secondary text-secondary-foreground',
+                  !isActive && 'hover:text-secondary-foreground hover:bg-secondary',
+                )}
+                href={`/dashboard/chat/${chatId}`}
+              >
+                {isGroupChat ? (
+                  <div className="flex items-center justify-center text-lg w-8 h-8 bg-orange-400 rounded-full">
+                    <span className="text-white">
+                      {chat.name.charAt(0)}
+                    </span>
+                  </div>
+                ) : (
+                  <Image
+                    className="rounded-full"
+                    width={32}
+                    height={32}
+                    sizes="32px"
+                    src={chat.users[0].image}
+                    alt="Chat avatar"
+                  />
+                )}
+
+                {chat.name}
+                {unseenMessagesCount > 0 && (
+                  <span className="flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full min-w-[24px] min-h-[24px] leading-0">
+                    {unseenMessagesCount > 99 
+                      ? "99+"
+                      : unseenMessagesCount
+                    }
                   </span>
-                </div>
-              ) : (
-                <Image
-                  className='rounded-full'
-                  width={32}
-                  height={32}
-                  sizes="32px"
-                  src={chat.users[0].image}
-                  alt='Chat avatar'
-                />
-              )}
-
-              {chat.name}
-              {unseenMessagesCount > 0 && (
-                <span className='flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded-full min-w-[24px] min-h-[24px] leading-0'>
-                  {unseenMessagesCount > 99 
-                    ? "99+"
-                    : unseenMessagesCount
-                  }
-                </span>
-              )}
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+                )}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 };
 

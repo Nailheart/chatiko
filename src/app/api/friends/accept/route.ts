@@ -1,11 +1,10 @@
+import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { redis } from "@/lib/redis";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { pusherServer } from "@/lib/pusher";
-import { PusherChannel, PusherEvent } from '@/enums/enums';
-import { nanoid } from "nanoid";
 
 const POST = async (req: Request) => {
   try {
@@ -23,28 +22,33 @@ const POST = async (req: Request) => {
       return NextResponse.json('Сannot find this user', { status: 400 });
     }
 
-    // accept friend request
-    await pusherServer.trigger(
-      PusherChannel.INCOMING_FRIEND_REQUESTS_ID + user.id,
-      PusherEvent.ACECEPT_FRIEND_REQUEST,
-      'Friend request accepted!'
+    // remove friend request and update friend request count
+    pusherServer.trigger(
+      user.id,
+      'accept_friend_request',
+      friend
+    );
+    pusherServer.trigger(
+      friendId,
+      'accept_friend_request',
+      user
     );
     
     const chatId = nanoid();
     
     // add new chat in sidebar
-    await pusherServer.trigger(
-      PusherChannel.NEW_CHAT_ID + user.id,
-      PusherEvent.NEW_CHAT,
+    pusherServer.trigger(
+      user.id,
+      'new_chat',
       {
         id: chatId,
         users: [friend],
         name: friend.name,
       }
     );
-    await pusherServer.trigger(
-      PusherChannel.NEW_CHAT_ID + friendId,
-      PusherEvent.NEW_CHAT,
+    pusherServer.trigger(
+      friendId,
+      'new_chat',
       {
         id: chatId,
         users: [user],
@@ -63,6 +67,10 @@ const POST = async (req: Request) => {
       users: [user],
       name: user.name,
     });
+
+    // add new friend
+    await redis.sadd(`user:${user.id}:friend_list`, friend);
+    await redis.sadd(`user:${friendId}:friend_list`, user);
     
     // delete friend request for both users
     await redis.srem(`user:${user.id}:incoming_friend_requests`, friendId);
