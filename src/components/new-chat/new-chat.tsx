@@ -123,6 +123,7 @@ const NewChat: FC<Props> = ({ friends }) => {
                       value={field.value}
                       isDisabled={isLoading}
                       closeMenuOnSelect={false}
+                      placeholder="Select friends..."
                       options={friends.map(friend => ({
                         value: friend.id,
                         label: friend.name,

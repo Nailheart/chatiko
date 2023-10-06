@@ -28,10 +28,7 @@ const Requests = async () => {
   return (
     <section className="container py-8">
       <h1 className='font-bold text-5xl my-8'>Friend requests</h1>
-      <FriendRequest
-        sessionId={session.user.id}
-        users={users as User[]}
-      />
+      <FriendRequest users={users as User[]} />
     </section>
   );
 };

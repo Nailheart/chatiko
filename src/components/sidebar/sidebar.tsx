@@ -44,13 +44,16 @@ const Sidebar: FC<Props> = ({
       setFriendRequests(prev => prev + 1);
     }
 
-    const acceptFriendRequest = (newFriend: User) => {
-      setFriends(prev => [...prev, newFriend]);
+    const acceptFriendRequest = () => {
       setFriendRequests(prev => prev - 1);
     }
 
     const rejectFriendRequest = () => {
       setFriendRequests(prev => prev - 1);
+    }
+
+    const addNewFriendHandler = (newFriend: User) => {
+      setFriends(prev => [...prev, newFriend]);
     }
 
     const newChatHandler = (chat: Chat) => {
@@ -77,6 +80,7 @@ const Sidebar: FC<Props> = ({
     pusherClient.bind('accept_friend_request', acceptFriendRequest);
     pusherClient.bind('reject_friend_request', rejectFriendRequest);
 
+    pusherClient.bind('add_new_friend', addNewFriendHandler);
     pusherClient.bind('new_chat', newChatHandler);
     pusherClient.bind('unseen_message', unseenMessagesHandler);
 
@@ -90,6 +94,7 @@ const Sidebar: FC<Props> = ({
       pusherClient.unbind('accept_friend_request', acceptFriendRequest);
       pusherClient.unbind('reject_friend_request', rejectFriendRequest);
       
+      pusherClient.unbind('add_new_friend', addNewFriendHandler);
       pusherClient.unbind('new_chat', newChatHandler);
       pusherClient.unbind('unseen_message', unseenMessagesHandler);
     }

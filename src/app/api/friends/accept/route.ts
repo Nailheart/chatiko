@@ -33,11 +33,23 @@ const POST = async (req: Request) => {
       );
     }
 
-    // Update friend request count and add friend to select in new chat
+    // Update friend request count
     pusherServer.trigger(
       user.id,
       'accept_friend_request',
       friend
+    );
+    
+    // add new friend to select
+    pusherServer.trigger(
+      user.id,
+      'add_new_friend',
+      friend
+    );
+    pusherServer.trigger(
+      friend.id,
+      'add_new_friend',
+      user
     );
     
     const chatId = nanoid();
