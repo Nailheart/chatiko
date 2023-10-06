@@ -33,16 +33,14 @@ const POST = async (req: Request) => {
       return NextResponse.json('This user is already on your friends list.', { status: 400 })
     }
 
-    const currentUser = await redis.get<User | null>(`user:${session.user.id}`);
-
-    // Send friend request
+    // Send friend request and update friend request count
     pusherServer.trigger(
       userId,
       'incoming_friend_requests',
-      currentUser,
+      session.user,
     );
 
-    // Add friend request to db
+    // Add friend request
     await redis.sadd(`user:${userId}:incoming_friend_requests`, session.user.id);
     
     return NextResponse.json('OK', { status: 200 });

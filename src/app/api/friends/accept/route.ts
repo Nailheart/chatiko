@@ -8,7 +8,7 @@ import { pusherServer } from "@/lib/pusher";
 
 const POST = async (req: Request) => {
   try {
-    const { id: friendId } = await req.json();
+    const { id } = await req.json();
     
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -16,27 +16,33 @@ const POST = async (req: Request) => {
     }
 
     const user = session.user as User;
-    const friend = await redis.get<User | null>(`user:${friendId}`);
+    const friend = await redis.get<User | null>(`user:${id}`);
     
     if (!friend) {
       return NextResponse.json('Сannot find this user', { status: 400 });
     }
+    
+    const friendRequests = await redis.smembers(`user:${friend.id}:incoming_friend_requests`);
+    const hasRequestFromUser = friendRequests.filter(reqId => reqId === user.id)[0];
 
-    // remove friend request and update friend request count
+    if (hasRequestFromUser) {
+      pusherServer.trigger(
+        friend.id,
+        'accept_friend_request',
+        user
+      );
+    }
+
+    // Update friend request count and add friend to select in new chat
     pusherServer.trigger(
       user.id,
       'accept_friend_request',
       friend
     );
-    pusherServer.trigger(
-      friendId,
-      'accept_friend_request',
-      user
-    );
     
     const chatId = nanoid();
     
-    // add new chat in sidebar
+    // add new chat to sidebar
     pusherServer.trigger(
       user.id,
       'new_chat',
@@ -47,7 +53,7 @@ const POST = async (req: Request) => {
       }
     );
     pusherServer.trigger(
-      friendId,
+      friend.id,
       'new_chat',
       {
         id: chatId,
@@ -62,7 +68,7 @@ const POST = async (req: Request) => {
       users: [friend],
       name: friend.name,
     });
-    await redis.sadd(`user:${friendId}:chats`, {
+    await redis.sadd(`user:${friend.id}:chats`, {
       id: chatId,
       users: [user],
       name: user.name,
@@ -70,11 +76,11 @@ const POST = async (req: Request) => {
 
     // add new friend
     await redis.sadd(`user:${user.id}:friend_list`, friend);
-    await redis.sadd(`user:${friendId}:friend_list`, user);
+    await redis.sadd(`user:${friend.id}:friend_list`, user);
     
     // delete friend request for both users
-    await redis.srem(`user:${user.id}:incoming_friend_requests`, friendId);
-    await redis.srem(`user:${friendId}:incoming_friend_requests`, user.id);
+    await redis.srem(`user:${user.id}:incoming_friend_requests`, friend.id);
+    await redis.srem(`user:${friend.id}:incoming_friend_requests`, user.id);
 
     return NextResponse.json('OK');
   } catch (error) {

@@ -8,30 +8,27 @@ import { toast } from "react-toastify";
 import { pusherClient } from "@/lib/pusher";
 
 type Props = {
-  sessionId: string;
   users: User[];
 }
 
-const FriendRequest: FC<Props> = ({ sessionId, users }) => {
+const FriendRequest: FC<Props> = ({ users }) => {
   const [friendRequests, setFriendRequests] = useState(users);
 
   useEffect(() => {
-    const incomingFriendRequests = pusherClient.subscribe(sessionId);
-
-    const friendRequestHandler = (user: User) => {
+    const addFriendRequest = (user: User) => {
       setFriendRequests(prev => [...prev, user]);
     }
 
-    const removeFriendRequestHandler = (user: User) => {
+    const removeFriendRequest = (user: User) => {
       setFriendRequests(prev => prev.filter(req => req.id !== user.id));
     }
 
-    incomingFriendRequests.bind('incoming_friend_requests', friendRequestHandler);
-    incomingFriendRequests.bind('accept_friend_request', removeFriendRequestHandler);
+    pusherClient.bind('incoming_friend_requests', addFriendRequest);
+    pusherClient.bind('accept_friend_request', removeFriendRequest);
 
     return () => {
-      incomingFriendRequests.unsubscribe();
-      incomingFriendRequests.unbind_all();
+      pusherClient.unbind('incoming_friend_requests', addFriendRequest);
+      pusherClient.unbind('accept_friend_request', removeFriendRequest);
     }
   }, []);
 
@@ -97,7 +94,7 @@ const FriendRequest: FC<Props> = ({ sessionId, users }) => {
               width={40}
               height={40}
               sizes="40px"
-              src={user.image || ''}
+              src={user.image}
               alt='Profile avatar'
             />
 
