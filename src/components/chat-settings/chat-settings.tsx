@@ -16,19 +16,19 @@ import {
 import { Button } from "@/components/ui/button";
 
 type Props = {
-  chatId: string;
-  chatPartner: User;
+  chat: Chat;
+  isGroupChat: boolean;
 }
 
-const ChatSettings: FC<Props> = ({ chatId, chatPartner }) => {
+const ChatSettings: FC<Props> = ({ chat, isGroupChat }) => {
   const router = useRouter();
 
   const deleteChatHandler = async () => {
     await fetch('/api/chat/delete-chat', {
       method: 'DELETE',
-      body: JSON.stringify({ chatId, chatPartnerId: chatPartner.id }),
+      body: JSON.stringify({ chat, isGroupChat }),
     });
-    router.push('/dashboard');
+    router.replace('/dashboard');
   }
 
   return (
@@ -47,12 +47,19 @@ const ChatSettings: FC<Props> = ({ chatId, chatPartner }) => {
         </SheetHeader>
         <div className="flex justify-between flex-wrap gap-4 bg-red-50 border-red-200 p-6 mt-4 rounded-lg">
           <div>
-            <h2 className="text-lg font-semibold">
+            <h2 className="text-lg font-semibold mb-2">
               Delete chat
             </h2>
-            <p className="text-gray-600">
-              Once you delete this chat, there is no going back. This will also remove <span className="text-destructive truncate">{chatPartner.name}</span> from your friends list.
-            </p>
+            {isGroupChat && (
+              <p className="text-gray-600">
+                You are about to exit the <span className="text-destructive truncate">{chat.name}</span>. By doing so, you will remove the chat history solely for yourself. The chat will be permanently deleted once the last user departs.
+              </p>
+            )}
+            {!isGroupChat && (
+              <p className="text-gray-600">
+                Once you delete this chat, there is no going back. This will also remove <span className="text-destructive truncate">{chat.users[0].name}</span> from your friends list.
+              </p>
+            )}
           </div>
           <SheetClose asChild>
             <Button

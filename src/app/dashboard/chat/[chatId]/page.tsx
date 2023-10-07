@@ -29,11 +29,12 @@ const Chat = async ({ params }: Props) => {
   
   const chats = await redis.smembers<Chat[]>(`user:${session.user.id}:chats`);
   const chat = chats.filter(chat => chat.id === chatId)[0];
-  const isGroupChat = chat.users.length > 1;
 
   if (!session.user || !chat) {
     notFound();
   }
+
+  const isGroupChat = chat.users.length > 1;
 
   const initialMessages = await redis.zrange<Message[]>(`chat:${chatId}:messages`, 0, -1, {
     rev: true,
@@ -82,10 +83,10 @@ const Chat = async ({ params }: Props) => {
             </div>
           </div>
         )}
-        {/* <ChatSettings 
-          chatId={chatId}
-          chatPartner={chatPartner}
-        /> */}
+        <ChatSettings
+          chat={chat}
+          isGroupChat={isGroupChat}
+        />
       </div>
       <ChatMessages
         chatId={chatId}

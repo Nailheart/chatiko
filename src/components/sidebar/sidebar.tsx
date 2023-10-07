@@ -56,6 +56,10 @@ const Sidebar: FC<Props> = ({
       setFriends(prev => [...prev, newFriend]);
     }
 
+    const deleteFriendHandler = (friend: User) => {
+      setFriends(prev => prev.filter(item => item.id !== friend.id));
+    }
+
     const newChatHandler = (chat: Chat) => {
       setChats(prev => [...prev, chat]);
     }
@@ -76,13 +80,20 @@ const Sidebar: FC<Props> = ({
       setUnseenMessages(prev => [...prev, message]);
     }
 
+    const chatDeleteHandler = (chatId: string) => {
+      setChats(prev =>  prev.filter(chat => chat.id !== chatId));
+    }
+
     pusherClient.bind('incoming_friend_requests', updateFriendRequestCount);
     pusherClient.bind('accept_friend_request', acceptFriendRequest);
     pusherClient.bind('reject_friend_request', rejectFriendRequest);
 
     pusherClient.bind('add_new_friend', addNewFriendHandler);
+    pusherClient.bind('delete_friend', deleteFriendHandler);
+
     pusherClient.bind('new_chat', newChatHandler);
     pusherClient.bind('unseen_message', unseenMessagesHandler);
+    pusherClient.bind('chat_delete', chatDeleteHandler);
 
     return () => {
       pusherClient.unsubscribe(user.id);
@@ -95,8 +106,11 @@ const Sidebar: FC<Props> = ({
       pusherClient.unbind('reject_friend_request', rejectFriendRequest);
       
       pusherClient.unbind('add_new_friend', addNewFriendHandler);
+      pusherClient.unbind('delete_friend', deleteFriendHandler);
+      
       pusherClient.unbind('new_chat', newChatHandler);
       pusherClient.unbind('unseen_message', unseenMessagesHandler);
+      pusherClient.unbind('chat_delete', chatDeleteHandler);
     }
   }, [pathname, chats]);
 
