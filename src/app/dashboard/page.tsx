@@ -1,7 +1,7 @@
 const Dashboard = () => {
   return (
     <section className="container py-8">
-      <h1 className="font-bold text-5xl my-8">Dashboard</h1>
+      <h1 className="my-8 text-5xl font-bold">Dashboard</h1>
     </section>
   );
 };

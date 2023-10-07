@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'react-toastify';
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "react-toastify";
 
-import { inviteFriend } from '@/lib/validations/invite-friend';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { inviteFriend } from "@/lib/validations/invite-friend";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -15,9 +15,9 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+} from "@/components/ui/form";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
 
 const InviteFriend = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -25,16 +25,16 @@ const InviteFriend = () => {
   const form = useForm<z.infer<typeof inviteFriend>>({
     resolver: zodResolver(inviteFriend),
     defaultValues: {
-      email: '',
-    }
+      email: "",
+    },
   });
 
   const onSubmit = async (data: z.infer<typeof inviteFriend>) => {
     setIsLoading(true);
 
     try {
-      const req = await fetch('/api/friends/invite', {
-        method: 'POST',
+      const req = await fetch("/api/friends/invite", {
+        method: "POST",
         body: JSON.stringify(data),
       });
 
@@ -44,14 +44,14 @@ const InviteFriend = () => {
         return;
       }
 
-      toast.success('Friend request successfully sent!');
+      toast.success("Friend request successfully sent!");
       form.reset();
     } catch (error) {
-      toast.error('Uh oh! Something went wrong.');
+      toast.error("Uh oh! Something went wrong.");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
@@ -61,7 +61,7 @@ const InviteFriend = () => {
           name="email"
           render={({ field }) => (
             <FormItem className="relative">
-              <FormLabel className="text-base font-medium text-gray-900 cursor-pointer">
+              <FormLabel className="cursor-pointer text-base font-medium text-gray-900">
                 Invite a friend by email
               </FormLabel>
               <FormControl>
@@ -77,15 +77,8 @@ const InviteFriend = () => {
             </FormItem>
           )}
         />
-        <Button
-          className="mt-6"
-          type="submit"
-          disabled={isLoading}
-        >
-          {isLoading
-            ? <Loader2 className="animate-spin" />
-            : 'Submit'
-          }
+        <Button className="mt-6" type="submit" disabled={isLoading}>
+          {isLoading ? <Loader2 className="animate-spin" /> : "Submit"}
         </Button>
       </form>
     </Form>

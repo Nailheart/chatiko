@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { signOut } from 'next-auth/react';
-import { Loader2, LogOut } from 'lucide-react';
-import { ButtonHTMLAttributes, FC, useState } from 'react';
+import { signOut } from "next-auth/react";
+import { Loader2, LogOut } from "lucide-react";
+import { ButtonHTMLAttributes, FC, useState } from "react";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement>;
 
@@ -18,14 +18,15 @@ const SignOutButton: FC<Props> = ({ ...props }) => {
       aria-label="Sign out"
       onClick={() => {
         setIsLoading(true);
-        signOut({ callbackUrl: '/' });
+        signOut({ callbackUrl: "/" });
       }}
       {...props}
     >
-      {isLoading 
-        ? <Loader2 className='animate-spin h-4 w-4' />
-        : <LogOut className='w-4 h-4' />
-      }
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <LogOut className="h-4 w-4" />
+      )}
     </Button>
   );
 };

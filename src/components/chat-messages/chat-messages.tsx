@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import { FC, useEffect, useState } from "react";
@@ -13,7 +13,7 @@ type Props = {
   currentUser: User;
   initialMessages: Message[];
   isGroupChat: boolean;
-}
+};
 
 const ChatMessages: FC<Props> = ({
   chatId,
@@ -28,16 +28,16 @@ const ChatMessages: FC<Props> = ({
     const chat = pusherClient.subscribe(chatId);
 
     const messageHandler = (message: Message) => {
-      setMessages(prev => [message, ...prev]);
-    }
+      setMessages((prev) => [message, ...prev]);
+    };
 
-    chat.bind('new_message', messageHandler);
+    chat.bind("new_message", messageHandler);
 
     return () => {
       chat.unsubscribe();
       chat.unbind_all();
-    }
-  }, []);
+    };
+  }, [chatId]);
 
   useEffect(() => {
     // Scroll to the last message
@@ -47,42 +47,41 @@ const ChatMessages: FC<Props> = ({
   }, [messages]);
 
   return (
-    <div className='flex h-full flex-1 flex-col-reverse gap-4 py-4 px-8'>
+    <div className="flex h-full flex-1 flex-col-reverse gap-4 px-8 py-4">
       {messages.map((message, index) => {
         const isCurrentUser = message.senderId === currentUser.id;
-        const isFirstMessage = messages[index].senderId !== messages[index + 1]?.senderId;
+        const isFirstMessage =
+          messages[index].senderId !== messages[index + 1]?.senderId;
 
-        const chatPartner = isGroupChat 
-          ? chatPartners.filter(partner => partner.id === message.senderId)[0]
-          : chatPartners[0]
+        const chatPartner = isGroupChat
+          ? chatPartners.filter((partner) => partner.id === message.senderId)[0]
+          : chatPartners[0];
 
-        const currDate = format(messages[index].timestamp, 'd');
-        const nextDate = index !== messages.length - 1 ? format(messages[index + 1]?.timestamp, 'd') : '';
+        const currDate = format(messages[index].timestamp, "d");
+        const nextDate =
+          index !== messages.length - 1
+            ? format(messages[index + 1]?.timestamp, "d")
+            : "";
         const isNextDay = parseInt(nextDate) !== parseInt(currDate);
 
         return (
           <div key={message.id}>
             {isNextDay && (
-              <time className="block text-muted-foreground text-xs text-center mb-2">
-                {format(message.timestamp, 'dd/MM/yy')}
+              <time className="mb-2 block text-center text-xs text-muted-foreground">
+                {format(message.timestamp, "dd/MM/yy")}
               </time>
             )}
             {isFirstMessage && isGroupChat && (
-              <p className={cn(
-                'text-xs mb-1',
-                isCurrentUser && 'text-right'
-              )}>
+              <p className={cn("mb-1 text-xs", isCurrentUser && "text-right")}>
                 {chatPartner.name}
               </p>
             )}
-            <div className={cn(
-              'flex items-start',
-              isCurrentUser && 'justify-end',
-            )}>
-              <div className={cn(
-                'w-10 h-10 shrink-0',
-                isCurrentUser && 'order-2',
-              )}>
+            <div
+              className={cn("flex items-start", isCurrentUser && "justify-end")}
+            >
+              <div
+                className={cn("h-10 w-10 shrink-0", isCurrentUser && "order-2")}
+              >
                 {isFirstMessage && (
                   <Image
                     className="rounded-full"
@@ -90,25 +89,29 @@ const ChatMessages: FC<Props> = ({
                     width={40}
                     height={40}
                     sizes="40px"
-                    alt='Profile picture'
+                    alt="Profile picture"
                   />
                 )}
               </div>
 
-              <p className={cn(
-                'bg-secondary text-secondary-foreground flex items-baseline flex-wrap gap-2 break-all mx-2 px-4 py-2 rounded-lg',
-                isCurrentUser && 'bg-primary text-primary-foreground',
-                isCurrentUser && isFirstMessage && 'rounded-tr-none',
-                !isCurrentUser && isFirstMessage && 'rounded-tl-none',
-              )}>
+              <p
+                className={cn(
+                  "mx-2 flex flex-wrap items-baseline gap-2 break-all rounded-lg bg-secondary px-4 py-2 text-secondary-foreground",
+                  isCurrentUser && "bg-primary text-primary-foreground",
+                  isCurrentUser && isFirstMessage && "rounded-tr-none",
+                  !isCurrentUser && isFirstMessage && "rounded-tl-none",
+                )}
+              >
                 <span>{message.content}</span>
-                <span className={cn(
-                  'text-muted-foreground text-xs shrink-0 ml-auto',
-                  isCurrentUser && 'text-primary-foreground'
-                )}>
-                  {format(message.timestamp, 'HH:mm')}
+                <span
+                  className={cn(
+                    "ml-auto shrink-0 text-xs text-muted-foreground",
+                    isCurrentUser && "text-primary-foreground",
+                  )}
+                >
+                  {format(message.timestamp, "HH:mm")}
                 </span>
-              </p>  
+              </p>
             </div>
           </div>
         );

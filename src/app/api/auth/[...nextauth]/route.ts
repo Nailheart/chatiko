@@ -1,7 +1,7 @@
 import NextAuth, { AuthOptions } from "next-auth";
-import { UpstashRedisAdapter } from '@next-auth/upstash-redis-adapter';
-import GithubProvider from 'next-auth/providers/github';
-import GoogleProvider from 'next-auth/providers/google';
+import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter";
+import GithubProvider from "next-auth/providers/github";
+import GoogleProvider from "next-auth/providers/google";
 
 import { redis } from "@/lib/redis";
 
@@ -13,8 +13,16 @@ const {
   NEXTAUTH_SECRET,
 } = process.env;
 
-if (!GITHUB_ID || !GITHUB_SECRET || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !NEXTAUTH_SECRET) {
-  throw new Error("Missing environment variables. Please check your configuration.");
+if (
+  !GITHUB_ID ||
+  !GITHUB_SECRET ||
+  !GOOGLE_CLIENT_ID ||
+  !GOOGLE_CLIENT_SECRET ||
+  !NEXTAUTH_SECRET
+) {
+  throw new Error(
+    "Missing environment variables. Please check your configuration.",
+  );
 }
 
 export const authOptions: AuthOptions = {
@@ -56,16 +64,16 @@ export const authOptions: AuthOptions = {
         name: currentUser.name,
         email: currentUser.email,
         picture: currentUser.image,
-      }
+      };
     },
   },
   pages: {
-    signIn: '/',
+    signIn: "/",
   },
   session: {
-    strategy: 'jwt',
+    strategy: "jwt",
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === "development",
   secret: NEXTAUTH_SECRET,
 };
 

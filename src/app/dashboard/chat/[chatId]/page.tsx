@@ -10,25 +10,25 @@ import { ChatInput } from "@/components/chat-input/chat-input";
 import { ChatSettings } from "@/components/chat-settings/chat-settings";
 
 export const metadata: Metadata = {
-  title: 'Chatiko | Chat',
-}
+  title: "Chatiko | Chat",
+};
 
 type Props = {
   params: {
     chatId: string;
-  }
-}
+  };
+};
 
 const Chat = async ({ params }: Props) => {
   const session = await getServerSession(authOptions);
   if (!session) {
     redirect("/");
   }
-  
+
   const { chatId } = params;
-  
+
   const chats = await redis.smembers<Chat[]>(`user:${session.user.id}:chats`);
-  const chat = chats.filter(chat => chat.id === chatId)[0];
+  const chat = chats.filter((chat) => chat.id === chatId)[0];
 
   if (!session.user || !chat) {
     notFound();
@@ -36,17 +36,32 @@ const Chat = async ({ params }: Props) => {
 
   const isGroupChat = chat.users.length > 1;
 
-  const initialMessages = await redis.zrange<Message[]>(`chat:${chatId}:messages`, 0, -1, {
-    rev: true,
-  });
-  
+  const initialMessages = await redis.zrange<Message[]>(
+    `chat:${chatId}:messages`,
+    0,
+    -1,
+    {
+      rev: true,
+    },
+  );
+
   // Remove all unseen messages from this chat
-  const unseenMessages = await redis.lrange<UnseenMessage>(`user:${session.user.id}:unseen_messages`, 0, -1);
-  const chatUnseenMessage = unseenMessages.filter(msg => msg.chatId === chatId);
+  const unseenMessages = await redis.lrange<UnseenMessage>(
+    `user:${session.user.id}:unseen_messages`,
+    0,
+    -1,
+  );
+  const chatUnseenMessage = unseenMessages.filter(
+    (msg) => msg.chatId === chatId,
+  );
 
   const messagesToRemove: Promise<number>[] = [];
-  chatUnseenMessage.forEach(unseenMessage => {
-    const req = redis.lrem(`user:${session.user.id}:unseen_messages`, 0, unseenMessage);
+  chatUnseenMessage.forEach((unseenMessage) => {
+    const req = redis.lrem(
+      `user:${session.user.id}:unseen_messages`,
+      0,
+      unseenMessage,
+    );
     messagesToRemove.push(req);
   });
 
@@ -55,15 +70,15 @@ const Chat = async ({ params }: Props) => {
   }
 
   return (
-    <section className='flex flex-col justify-between h-full'>
-      <div className='flex justify-between gap-4 sticky left-0 top-0 bg-background px-8 py-4 border-b-2'>
+    <section className="flex h-full flex-col justify-between">
+      <div className="sticky left-0 top-0 flex justify-between gap-4 border-b-2 bg-background px-8 py-4">
         {isGroupChat && (
           <div>
-            <h1 className="font-bold text-3xl">{chat.name}</h1>
+            <h1 className="text-3xl font-bold">{chat.name}</h1>
           </div>
         )}
         {!isGroupChat && (
-          <div className='flex items-center space-x-4'>
+          <div className="flex items-center space-x-4">
             <Image
               className="rounded-full"
               src={chat.users[0].image}
@@ -73,20 +88,15 @@ const Chat = async ({ params }: Props) => {
               sizes="40px"
             />
 
-            <div className='flex flex-col leading-tight'>
-              <span className='font-semibold mr-3'>
-                {chat.users[0].name}
-              </span>
-              <span className='text-muted-foreground text-sm'>
+            <div className="flex flex-col leading-tight">
+              <span className="mr-3 font-semibold">{chat.users[0].name}</span>
+              <span className="text-sm text-muted-foreground">
                 {chat.users[0].email}
               </span>
             </div>
           </div>
         )}
-        <ChatSettings
-          chat={chat}
-          isGroupChat={isGroupChat}
-        />
+        <ChatSettings chat={chat} isGroupChat={isGroupChat} />
       </div>
       <ChatMessages
         chatId={chatId}

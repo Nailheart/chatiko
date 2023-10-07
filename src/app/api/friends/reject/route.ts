@@ -11,23 +11,23 @@ const POST = async (req: Request) => {
     const session = await getServerSession(authOptions);
 
     if (!session) {
-      return NextResponse.json('You need to authorize first.', { status: 401 });
+      return NextResponse.json("You need to authorize first.", { status: 401 });
     }
 
     // Remove friend request from state
     pusherServer.trigger(
       session.user.id,
-      'reject_friend_request',
-      'Friend request rejected!',
+      "reject_friend_request",
+      "Friend request rejected!",
     );
 
     // Remove friend request from db
     await redis.srem(`user:${session.user.id}:incoming_friend_requests`, id);
-    
-    return NextResponse.json('OK');
+
+    return NextResponse.json("OK");
   } catch (error) {
-    return NextResponse.json('Bad request', { status: 400 });
+    return NextResponse.json("Bad request", { status: 400 });
   }
-}
+};
 
 export { POST };

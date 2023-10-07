@@ -10,15 +10,19 @@ const DELETE = async (req: Request) => {
 
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json('You need to authorize first.', { status: 401 });
+      return NextResponse.json("You need to authorize first.", { status: 401 });
     }
 
-    await redis.lrem(`user:${session.user.id}:unseen_messages`, 0, unseenMessage);
+    await redis.lrem(
+      `user:${session.user.id}:unseen_messages`,
+      0,
+      unseenMessage,
+    );
 
-    return NextResponse.json('OK');
+    return NextResponse.json("OK");
   } catch (error) {
-    return NextResponse.json('Bad request', { status: 400 });
+    return NextResponse.json("Bad request", { status: 400 });
   }
-}
+};
 
 export { DELETE };
