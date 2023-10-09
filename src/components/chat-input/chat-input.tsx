@@ -42,7 +42,7 @@ const ChatInput: FC<Props> = ({ chatId }) => {
   };
 
   return (
-    <div className="sticky bottom-0 left-0 border-t bg-background px-8 py-6">
+    <div className="sticky bottom-0 left-0 border-t bg-background p-4 md:px-8 md:py-6">
       <div className="flex justify-between rounded-lg">
         <Input
           ref={textareaRef}

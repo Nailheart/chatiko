@@ -12,7 +12,7 @@ const newChat = z.object({
       }),
     )
     .min(1, {
-      message: "Chat must contain at least 2 members",
+      message: "Chat must contain at least 1 member",
     }),
 });
 

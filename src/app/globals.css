@@ -61,6 +61,12 @@
   }
 }
 
+.sidebar {
+  @media (max-width: 400px) {
+    width: 80%;
+  }
+}
+
 .scrollbar-thin {
   scrollbar-width: thin;
 }

@@ -47,7 +47,7 @@ const ChatMessages: FC<Props> = ({
   }, [messages]);
 
   return (
-    <div className="flex h-full flex-1 flex-col-reverse gap-4 px-8 py-4">
+    <div className="flex h-full flex-1 flex-col-reverse gap-4 p-4 md:px-8">
       {messages.map((message, index) => {
         const isCurrentUser = message.senderId === currentUser.id;
         const isFirstMessage =

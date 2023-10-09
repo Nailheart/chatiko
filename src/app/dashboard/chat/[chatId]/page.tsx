@@ -71,10 +71,10 @@ const Chat = async ({ params }: Props) => {
 
   return (
     <section className="flex h-full flex-col justify-between">
-      <div className="sticky left-0 top-0 flex justify-between gap-4 border-b-2 bg-background px-8 py-4">
+      <div className="sticky left-0 top-0 flex items-center border-b-2 bg-background p-4 pl-14 md:px-8">
         {isGroupChat && (
-          <div>
-            <h1 className="text-3xl font-bold">{chat.name}</h1>
+          <div className="grid grid-cols-1">
+            <h1 className="truncate text-3xl font-bold">{chat.name}</h1>
           </div>
         )}
         {!isGroupChat && (
@@ -88,15 +88,19 @@ const Chat = async ({ params }: Props) => {
               sizes="40px"
             />
 
-            <div className="flex flex-col leading-tight">
-              <span className="mr-3 font-semibold">{chat.users[0].name}</span>
-              <span className="text-sm text-muted-foreground">
+            <div className="grid grid-cols-1 leading-tight">
+              <span className="mr-3 truncate font-semibold">
+                {chat.users[0].name}
+              </span>
+              <span className="truncate text-sm text-muted-foreground">
                 {chat.users[0].email}
               </span>
             </div>
           </div>
         )}
-        <ChatSettings chat={chat} isGroupChat={isGroupChat} />
+        <div className="ml-auto">
+          <ChatSettings chat={chat} isGroupChat={isGroupChat} />
+        </div>
       </div>
       <ChatMessages
         chatId={chatId}

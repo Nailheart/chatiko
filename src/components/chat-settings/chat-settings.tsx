@@ -34,7 +34,7 @@ const ChatSettings: FC<Props> = ({ chat, isGroupChat }) => {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost">
+        <Button className="px-2 py-1" variant="ghost">
           <Settings />
         </Button>
       </SheetTrigger>
@@ -44,13 +44,15 @@ const ChatSettings: FC<Props> = ({ chat, isGroupChat }) => {
           <SheetDescription>Make changes to chat here</SheetDescription>
         </SheetHeader>
         <div className="mt-4 flex flex-wrap justify-between gap-4 rounded-lg border-red-200 bg-red-50 p-6">
-          <div>
+          <div className="grid grid-cols-1">
             <h2 className="mb-2 text-lg font-semibold">Delete chat</h2>
             {isGroupChat && (
               <p className="text-gray-600">
                 You are about to exit the{" "}
-                <span className="truncate text-destructive">{chat.name}</span>.
-                By doing so, you will remove the chat history solely for
+                <span className="break-words text-destructive">
+                  {chat.name}
+                </span>
+                . By doing so, you will remove the chat history solely for
                 yourself. The chat will be permanently deleted once the last
                 user departs.
               </p>
@@ -59,7 +61,7 @@ const ChatSettings: FC<Props> = ({ chat, isGroupChat }) => {
               <p className="text-gray-600">
                 Once you delete this chat, there is no going back. This will
                 also remove{" "}
-                <span className="truncate text-destructive">
+                <span className="break-words text-destructive">
                   {chat.users[0].name}
                 </span>{" "}
                 from your friends list.
