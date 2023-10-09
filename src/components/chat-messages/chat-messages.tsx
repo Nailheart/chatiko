@@ -12,7 +12,7 @@ type Props = {
   chatPartners: User[];
   currentUser: User;
   initialMessages: Message[];
-  isGroupChat: boolean;
+  isGroupChat?: boolean;
 };
 
 const ChatMessages: FC<Props> = ({

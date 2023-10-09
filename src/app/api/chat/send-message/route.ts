@@ -15,13 +15,6 @@ const POST = async (req: Request) => {
       return NextResponse.json("You need to authorize first.", { status: 401 });
     }
 
-    const chats = await redis.smembers<Chat[]>(`user:${session.user.id}:chats`);
-    const chat = chats.filter((chat) => chat.id === chatId)[0];
-
-    if (!chat) {
-      return NextResponse.json("No such chat found.", { status: 400 });
-    }
-
     const timestamp = Date.now();
     const message: Message = {
       id: nanoid(),
@@ -30,23 +23,38 @@ const POST = async (req: Request) => {
       timestamp,
     };
 
-    const unseenMessage: UnseenMessage = {
-      chatId,
-      ...message,
-    };
+    if (chatId !== "global_chat") {
+      const chats = await redis.smembers<Chat[]>(
+        `user:${session.user.id}:chats`,
+      );
+      const chat = chats.filter((chat) => chat.id === chatId)[0];
 
-    // add message to unseen messages for each user
-    const sendUnseenMessage: Promise<number>[] = [];
-    chat.users.forEach((user) => {
-      const req = redis.lpush(`user:${user.id}:unseen_messages`, unseenMessage);
-      sendUnseenMessage.push(req);
-    });
+      if (!chat) {
+        return NextResponse.json("No such chat found.", { status: 400 });
+      }
 
-    await Promise.all(sendUnseenMessage);
+      const unseenMessage: UnseenMessage = {
+        chatId,
+        ...message,
+      };
+
+      // add message to unseen messages for each user
+      const sendUnseenMessage: Promise<number>[] = [];
+      chat.users.forEach((user) => {
+        const req = redis.lpush(
+          `user:${user.id}:unseen_messages`,
+          unseenMessage,
+        );
+        sendUnseenMessage.push(req);
+      });
+
+      await Promise.all(sendUnseenMessage);
+
+      pusherServer.trigger(chatId, "unseen_message", unseenMessage);
+    }
 
     // Trigger events using Pusher
     pusherServer.trigger(chatId, "new_message", message);
-    pusherServer.trigger(chatId, "unseen_message", unseenMessage);
 
     // Store the message in database
     await redis.zadd(`chat:${chatId}:messages`, {

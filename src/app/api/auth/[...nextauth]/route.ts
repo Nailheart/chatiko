@@ -59,6 +59,9 @@ export const authOptions: AuthOptions = {
         return token;
       }
 
+      // add a new user or ignore if it already exists
+      await redis.sadd("all_users", currentUser);
+
       return {
         id: currentUser.id,
         name: currentUser.name,
