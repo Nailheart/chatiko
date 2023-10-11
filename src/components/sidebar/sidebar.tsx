@@ -139,7 +139,7 @@ const Sidebar: FC<Props> = ({
   return (
     <div
       className={cn(
-        "sidebar fixed left-0 top-0 z-50 w-full max-w-xs -translate-x-full bg-background duration-300 ease-in-out md:sticky md:translate-x-0",
+        "sidebar fixed left-0 top-0 z-50 h-screen w-full max-w-xs -translate-x-full bg-background duration-300 ease-in-out md:sticky md:translate-x-0",
         navIsOpen && "translate-x-0",
       )}
     >
@@ -154,7 +154,7 @@ const Sidebar: FC<Props> = ({
           <MenuSquareIcon className="bg-white" />
         )}
       </Button>
-      <div className="scrollbar-thin flex h-screen flex-col overflow-auto border-r px-6 py-3">
+      <div className="scrollbar-thin flex h-full flex-col overflow-auto border-r px-6 py-3">
         <Link
           className="mb-4 flex shrink-0 items-center self-start"
           href="/dashboard"
