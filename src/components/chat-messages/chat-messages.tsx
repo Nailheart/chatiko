@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { FC, useEffect, useState } from "react";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { pusherClient } from "@/lib/pusher";
@@ -11,7 +13,6 @@ type Props = {
   chatId: string;
   chatPartners: User[];
   currentUser: User;
-  initialMessages: Message[];
   isGroupChat?: boolean;
 };
 
@@ -19,10 +20,29 @@ const ChatMessages: FC<Props> = ({
   chatId,
   chatPartners,
   currentUser,
-  initialMessages,
   isGroupChat,
 }) => {
-  const [messages, setMessages] = useState(initialMessages);
+  const [loading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const getChatMessages = async () => {
+    setIsLoading(true);
+
+    const req = await fetch("/api/chat/get-chat-messages", {
+      method: "POST",
+      body: JSON.stringify({ chatId: chatId }),
+    });
+
+    if (!req.ok) {
+      const errorMessage = await req.json();
+      toast.error(errorMessage);
+      return;
+    }
+
+    const initialMessage = await req.json();
+    setMessages(initialMessage);
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     const chat = pusherClient.subscribe(chatId);
@@ -32,6 +52,8 @@ const ChatMessages: FC<Props> = ({
     };
 
     chat.bind("new_message", messageHandler);
+
+    getChatMessages();
 
     return () => {
       chat.unsubscribe();
@@ -46,6 +68,13 @@ const ChatMessages: FC<Props> = ({
     });
   }, [messages]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center">
+        <Loader2 className="animate-spin" size={40} />
+      </div>
+    );
+  }
   return (
     <div className="flex h-full flex-1 flex-col-reverse gap-4 p-4 md:px-8">
       {messages.map((message, index) => {

@@ -14,14 +14,6 @@ const Dashboard = async () => {
 
   const chatId = "global_chat";
   const users = await redis.smembers<User[]>("all_users");
-  const initialMessages = await redis.zrange<Message[]>(
-    `chat:${chatId}:messages`,
-    0,
-    -1,
-    {
-      rev: true,
-    },
-  );
 
   return (
     <section className="flex h-full flex-col justify-between">
@@ -33,7 +25,6 @@ const Dashboard = async () => {
         chatId={chatId}
         chatPartners={users}
         currentUser={session.user as User}
-        initialMessages={initialMessages}
         isGroupChat
       />
       <ChatInput chatId={chatId} />

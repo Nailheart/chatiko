@@ -36,15 +36,6 @@ const Chat = async ({ params }: Props) => {
 
   const isGroupChat = chat.users.length > 1;
 
-  const initialMessages = await redis.zrange<Message[]>(
-    `chat:${chatId}:messages`,
-    0,
-    -1,
-    {
-      rev: true,
-    },
-  );
-
   // Remove all unseen messages from this chat
   const unseenMessages = await redis.lrange<UnseenMessage>(
     `user:${session.user.id}:unseen_messages`,
@@ -106,7 +97,6 @@ const Chat = async ({ params }: Props) => {
         chatId={chatId}
         chatPartners={chat.users}
         currentUser={session.user as User}
-        initialMessages={initialMessages}
         isGroupChat={isGroupChat}
       />
       <ChatInput chatId={chatId} />
