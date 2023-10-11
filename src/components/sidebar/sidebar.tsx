@@ -4,6 +4,7 @@ import { FC, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
+  GlobeIcon,
   MenuSquareIcon,
   UserIcon,
   UserPlusIcon,
@@ -204,6 +205,15 @@ const Sidebar: FC<Props> = ({
                 </li>
                 <li>
                   <NewChat friends={friends} />
+                </li>
+                <li>
+                  <Link
+                    className="flex items-center gap-3 rounded-md p-2 text-sm font-semibold leading-6 duration-300 hover:bg-accent hover:text-accent-foreground"
+                    href="/dashboard/global-chat"
+                  >
+                    <GlobeIcon />
+                    <span className="truncate">Global Chat</span>
+                  </Link>
                 </li>
               </ul>
             </div>
