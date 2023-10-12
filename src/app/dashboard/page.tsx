@@ -40,7 +40,7 @@ const Dashboard = async () => {
             <span className="text-destructive">New Chat</span> popup
           </li>
           <li>
-            - or don't make Chatiko wait and start writing messages on{" "}
+            - or don&apos;t make Chatiko wait and start writing messages on{" "}
             <span className="text-destructive">Global Chat</span> page
           </li>
         </ul>
