@@ -3,13 +3,12 @@
 import Image from "next/image";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { GithubIcon, ChromeIcon, Loader2 } from "lucide-react";
+import { ChromeIcon, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 const SignIn = () => {
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-  const [isGithubLoading, setIsGithubLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="flex min-h-screen flex-col items-center p-8">
@@ -27,34 +26,14 @@ const SignIn = () => {
       <Button
         className="mb-4 mt-6 w-full max-w-xs text-lg"
         variant="outline"
-        disabled={isGoogleLoading || isGithubLoading}
+        disabled={isLoading}
         onClick={() => {
-          setIsGoogleLoading(true);
+          setIsLoading(true);
           signIn("google", { callbackUrl: "/dashboard" });
         }}
       >
-        {isGoogleLoading ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <ChromeIcon />
-        )}
+        {isLoading ? <Loader2 className="animate-spin" /> : <ChromeIcon />}
         <span className="ml-2">Google</span>
-      </Button>
-      <Button
-        className="w-full max-w-xs text-lg"
-        variant="outline"
-        disabled={isGoogleLoading || isGithubLoading}
-        onClick={() => {
-          setIsGithubLoading(true);
-          signIn("github", { callbackUrl: "/dashboard" });
-        }}
-      >
-        {isGithubLoading ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          <GithubIcon />
-        )}
-        <span className="ml-2">Github</span>
       </Button>
     </div>
   );

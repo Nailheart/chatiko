@@ -1,25 +1,12 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import { UpstashRedisAdapter } from "@next-auth/upstash-redis-adapter";
-import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 
 import { redis } from "@/lib/redis";
 
-const {
-  GITHUB_ID,
-  GITHUB_SECRET,
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  NEXTAUTH_SECRET,
-} = process.env;
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET } = process.env;
 
-if (
-  !GITHUB_ID ||
-  !GITHUB_SECRET ||
-  !GOOGLE_CLIENT_ID ||
-  !GOOGLE_CLIENT_SECRET ||
-  !NEXTAUTH_SECRET
-) {
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !NEXTAUTH_SECRET) {
   throw new Error(
     "Missing environment variables. Please check your configuration.",
   );
@@ -28,10 +15,6 @@ if (
 export const authOptions: AuthOptions = {
   adapter: UpstashRedisAdapter(redis),
   providers: [
-    GithubProvider({
-      clientId: GITHUB_ID,
-      clientSecret: GITHUB_SECRET,
-    }),
     GoogleProvider({
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
