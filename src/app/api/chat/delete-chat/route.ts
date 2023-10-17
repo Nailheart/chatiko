@@ -15,7 +15,7 @@ const DELETE = async (req: Request) => {
     }
 
     // Delete chat from sidebar
-    pusherServer.trigger(session.user.id, "chat_delete", chat.id);
+    await pusherServer.trigger(session.user.id, "chat_delete", chat.id);
 
     // Delete chat from chats
     await redis.srem(`user:${session.user.id}:chats`, chat);
@@ -40,7 +40,11 @@ const DELETE = async (req: Request) => {
 
     if (!isGroupChat) {
       // Delete friend from select
-      pusherServer.trigger(session.user.id, "delete_friend", chat.users[0]);
+      await pusherServer.trigger(
+        session.user.id,
+        "delete_friend",
+        chat.users[0],
+      );
 
       // Delete user from friend list
       await redis.srem(`user:${session.user.id}:friend_list`, chat.users[0]);

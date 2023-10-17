@@ -33,8 +33,9 @@ const POST = async (req: Request) => {
     };
 
     // add new chat in sidebar for each user
-    friends.map((friend: User) =>
-      pusherServer.trigger(friend.id, "new_chat", chat),
+    friends.map(
+      async (friend: User) =>
+        await pusherServer.trigger(friend.id, "new_chat", chat),
     );
 
     // add new chat in db for each user

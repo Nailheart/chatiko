@@ -50,11 +50,11 @@ const POST = async (req: Request) => {
 
       await Promise.all(sendUnseenMessage);
 
-      pusherServer.trigger(chatId, "unseen_message", unseenMessage);
+      await pusherServer.trigger(chatId, "unseen_message", unseenMessage);
     }
 
     // Trigger events using Pusher
-    pusherServer.trigger(chatId, "new_message", message);
+    await pusherServer.trigger(chatId, "new_message", message);
 
     // Store the message in database
     await redis.zadd(`chat:${chatId}:messages`, {

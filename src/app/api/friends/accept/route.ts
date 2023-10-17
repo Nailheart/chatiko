@@ -30,25 +30,25 @@ const POST = async (req: Request) => {
     )[0];
 
     if (hasRequestFromUser) {
-      pusherServer.trigger(friend.id, "accept_friend_request", user);
+      await pusherServer.trigger(friend.id, "accept_friend_request", user);
     }
 
     // Update friend request count
-    pusherServer.trigger(user.id, "accept_friend_request", friend);
+    await pusherServer.trigger(user.id, "accept_friend_request", friend);
 
     // add new friend to select
-    pusherServer.trigger(user.id, "add_new_friend", friend);
-    pusherServer.trigger(friend.id, "add_new_friend", user);
+    await pusherServer.trigger(user.id, "add_new_friend", friend);
+    await pusherServer.trigger(friend.id, "add_new_friend", user);
 
     const chatId = nanoid();
 
     // add new chat to sidebar
-    pusherServer.trigger(user.id, "new_chat", {
+    await pusherServer.trigger(user.id, "new_chat", {
       id: chatId,
       users: [friend],
       name: friend.name,
     });
-    pusherServer.trigger(friend.id, "new_chat", {
+    await pusherServer.trigger(friend.id, "new_chat", {
       id: chatId,
       users: [user],
       name: user.name,

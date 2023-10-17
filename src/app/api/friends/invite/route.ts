@@ -46,7 +46,11 @@ const POST = async (req: Request) => {
     }
 
     // Send friend request and update friend request count
-    pusherServer.trigger(userId, "incoming_friend_requests", session.user);
+    await pusherServer.trigger(
+      userId,
+      "incoming_friend_requests",
+      session.user,
+    );
 
     // Add friend request
     await redis.sadd(

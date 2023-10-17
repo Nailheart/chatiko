@@ -15,7 +15,7 @@ const POST = async (req: Request) => {
     }
 
     // Remove friend request from state
-    pusherServer.trigger(
+    await pusherServer.trigger(
       session.user.id,
       "reject_friend_request",
       "Friend request rejected!",
